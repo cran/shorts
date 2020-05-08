@@ -126,8 +126,8 @@ jack_split_kinematics
 ## -----------------------------------------------------------------------------
 # Since this is a perfect simulation and stats::nls will complain
 # we need to add very small noise, or measurement error
-john_split_kinematics$time <- john_split_kinematics$time + rnorm(length(sprint_distance), 0, 10^-6)
-jack_split_kinematics$time <- jack_split_kinematics$time + rnorm(length(sprint_distance), 0, 10^-6)
+john_split_kinematics$time <- john_split_kinematics$time + rnorm(length(sprint_distance), 0, 10^-5)
+jack_split_kinematics$time <- jack_split_kinematics$time + rnorm(length(sprint_distance), 0, 10^-5)
 
 john_split_params <- with(
   john_split_kinematics,
@@ -312,7 +312,7 @@ ggplot(split_kinematics, aes(x = distance, y = difference, color = name)) +
 
 ## -----------------------------------------------------------------------------
 # Add small noise to the data so the model with distance and time corrected can be fitted
-jack_kinematics$time <- jack_kinematics$time + rnorm(nrow(jack_kinematics), 0, 10^-6)
+jack_kinematics$time <- jack_kinematics$time + rnorm(nrow(jack_kinematics), 0, 10^-5)
 
 simple_model <- with(
   jack_kinematics,

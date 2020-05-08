@@ -1,7 +1,7 @@
-2a08ee03b1209860a4eddc63fcd33ae4 *DESCRIPTION
+8a36c25e0232690eb88cd5a4d475d6ab *DESCRIPTION
 e4cdb35b11fe2f41ccc7ecfffb47b17a *LICENSE
 b572ab1ada7e5a57a8632c1632a26282 *NAMESPACE
-f50dadd9447a65a10b8696d0450cacc8 *NEWS.md
+6d44114303219262cdae1f5f8dede5f8 *NEWS.md
 7cac38e56cfe2945f6cd37cfc31e8642 *R/find_functions.R
 f99f7c063b59a8718770cb8e6dc74889 *R/format_splits.R
 5ca4061356e35526253aced5b9c573a0 *R/mixed_model_using_splits.R
@@ -14,10 +14,10 @@ f6357a1b51ad0248feee4dc9391fb79b *R/predict_functions.R
 31fdf25f45b23d4ebb3115826dba821a *build/vignette.rds
 1216afa06fa05a151cf8e045f2f28fdc *data/radar_gun_data.rda
 cf498fc88ba51fc5d76e6f31f7dc1228 *data/split_times.rda
-ff8f3d2d8dc2c2d186937b9b258f69c7 *inst/CITATION
-125fa0cd0dfb8740e6b7e4f7f8a730f3 *inst/doc/sprint-corrections.R
-47a3e1ea72a3133e556fb342ccfbe1ae *inst/doc/sprint-corrections.Rmd
-d9859633dccf0d36d360788314b0b635 *inst/doc/sprint-corrections.html
+c1c8cde5f8989a8bc1ff3bb08d62ca5f *inst/CITATION
+60d6a0fb47d3c1e178ce316c245f510c *inst/doc/sprint-corrections.R
+8ab39d411f91d6fc87b0f99148e72873 *inst/doc/sprint-corrections.Rmd
+aa0312b2bdf5a9ff7f8b8511cb5fc21d *inst/doc/sprint-corrections.html
 090905b9dce70441ddde12a27909ae8a *man/figures/README-unnamed-chunk-10-1.png
 f46a74d5be3a3144baa93722f345efa8 *man/figures/README-unnamed-chunk-11-1.png
 f46a74d5be3a3144baa93722f345efa8 *man/figures/README-unnamed-chunk-12-1.png
@@ -40,4 +40,4 @@ c8a6869e65276f35e43616bf304a38b2 *man/format_splits.Rd
 af2014f6987c32a198165856cef95e9a *vignettes/john-and-jack.png
 1e51d60957a76d7de616a06b289672da *vignettes/john-and-jack.pptx
 1afb72c9663874ac6b2713fa231081de *vignettes/references.bib
-47a3e1ea72a3133e556fb342ccfbe1ae *vignettes/sprint-corrections.Rmd
+8ab39d411f91d6fc87b0f99148e72873 *vignettes/sprint-corrections.Rmd

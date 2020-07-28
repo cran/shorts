@@ -10,7 +10,10 @@ mixed_model_using_radar(
   velocity,
   athlete,
   time_correction = 0,
-  na.rm = FALSE
+  random = MSS + TAU ~ 1,
+  LOOCV = FALSE,
+  na.rm = FALSE,
+  ...
 )
 }
 \arguments{
@@ -25,7 +28,14 @@ mixed_model_using_radar(
 \item{time_correction}{Numeric vector. Used to filter out noisy data from the radar gun.
 This correction is done by adding \code{time_correction} to \code{time}. Default is 0. See more in Samozino (2018)}
 
+\item{random}{Formula forwarded to \code{\link[nlme]{nlme}} to set random effects. Default is \code{MSS + TAU ~ 1}}
+
+\item{LOOCV}{Should Leave-one-out cross-validation be used to estimate model fit? Default is \code{FALSE}.
+This can be very slow process due high level of samples in the radar data}
+
 \item{na.rm}{Logical. Default is FALSE}
+
+\item{...}{Forwarded to \code{\link[nlme]{nlme}} function}
 }
 \value{
 List object with the following elements:
@@ -49,7 +59,9 @@ This function models the sprint instantaneous velocity using mono-exponential eq
 \examples{
 data("radar_gun_data")
 mixed_model <- mixed_model_using_radar(radar_gun_data, "time", "velocity", "athlete")
-mixed_model$parameters
+
+# mixed_model$parameters
+coef(mixed_model)
 }
 \references{
 Samozino P. 2018. A Simple Method for Measuring Force, Velocity and Power Capabilities and Mechanical

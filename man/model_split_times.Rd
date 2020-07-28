@@ -12,6 +12,7 @@ model_using_splits(
   time,
   time_correction = 0,
   weights = 1,
+  LOOCV = FALSE,
   na.rm = FALSE,
   ...
 )
@@ -20,6 +21,7 @@ model_using_splits_with_time_correction(
   distance,
   time,
   weights = 1,
+  LOOCV = FALSE,
   na.rm = FALSE,
   ...
 )
@@ -28,6 +30,7 @@ model_using_splits_with_corrections(
   distance,
   time,
   weights = 1,
+  LOOCV = FALSE,
   na.rm = FALSE,
   ...
 )
@@ -41,6 +44,8 @@ done by adding \code{time_correction} to \code{time}. Default is 0. See more in 
 \item{weights}{Numeric vector. Default is vector of 1.
 This is used to give more weight to particular observations. For example, use \code{1\\distance} to give
 more weight to observations from shorter distances.}
+
+\item{LOOCV}{Should Leave-one-out cross-validation be used to estimate model fit? Default is \code{FALSE}}
 
 \item{na.rm}{Logical. Default is FALSE}
 
@@ -82,28 +87,36 @@ simple_model <- with(
   split_times,
   model_using_splits(distance, time)
 )
-unlist(simple_model$parameters)
+
+# unlist(simple_model$parameters)
+coef(simple_model)
 
 # Model with correction of 0.3s
 model_with_correction <- with(
   split_times,
   model_using_splits(distance, time, time_correction = 0.3)
 )
-unlist(model_with_correction$parameters)
+
+# unlist(model_with_correction$parameters)
+coef(model_with_correction)
 
 # Model with time_correction estimation
 model_with_time_correction_estimation <- with(
   split_times,
   model_using_splits_with_time_correction(distance, time)
 )
-unlist(model_with_time_correction_estimation$parameters)
+
+# unlist(model_with_time_correction_estimation$parameters)
+coef(model_with_time_correction_estimation)
 
 # Model with time and distance correction estimation
 model_with_time_distance_correction_estimation <- with(
   split_times,
   model_using_splits_with_corrections(distance, time)
 )
-unlist(model_with_time_distance_correction_estimation$parameters)
+
+# unlist(model_with_time_distance_correction_estimation$parameters)
+coef(model_with_time_distance_correction_estimation)
 }
 \references{
 Haugen TA, Tønnessen E, Seiler SK. 2012. The Difference Is in the Start: Impact of Timing and Start

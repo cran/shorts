@@ -1,3 +1,8 @@
+# shorts 1.1.1
+
+* Added James Vescovi contributed dataset (`data("vescovi")`). For more info see `?vescovi`
+
+
 # shorts 1.1.0
 
 * Used constructor functions for all modeling functions
@@ -11,9 +16,11 @@
 * Expanded the Readme.md file
 * Expanded the `sprint-corrections` vignette by adding a short simulation study
 
+
 # shorts 1.0.1
 
 * Corrected the error in vignette that showed on Solaris system. Increased the random noise to allow nls to fit
+
 
 # shorts 1.0.0
 

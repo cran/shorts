@@ -9,6 +9,12 @@
 \alias{predict_velocity_at_distance}
 \alias{predict_acceleration_at_distance}
 \alias{predict_acceleration_at_velocity}
+\alias{predict_air_resistance_at_time}
+\alias{predict_air_resistance_at_distance}
+\alias{predict_force_at_time}
+\alias{predict_force_at_distance}
+\alias{predict_power_at_distance}
+\alias{predict_power_at_time}
 \alias{predict_relative_power_at_distance}
 \alias{predict_relative_power_at_time}
 \title{Kinematics prediction functions}
@@ -51,17 +57,61 @@ predict_acceleration_at_distance(
 
 predict_acceleration_at_velocity(velocity, MSS, TAU)
 
+predict_air_resistance_at_time(time, MSS, TAU, time_correction = 0, ...)
+
+predict_air_resistance_at_distance(
+  distance,
+  MSS,
+  TAU,
+  time_correction = 0,
+  distance_correction = 0,
+  ...
+)
+
+predict_force_at_time(time, MSS, TAU, time_correction = 0, bodymass = 75, ...)
+
+predict_force_at_distance(
+  distance,
+  MSS,
+  TAU,
+  time_correction = 0,
+  distance_correction = 0,
+  bodymass = 75,
+  ...
+)
+
+predict_power_at_distance(
+  distance,
+  MSS,
+  TAU,
+  time_correction = 0,
+  distance_correction = 0,
+  bodymass = 75,
+  ...
+)
+
+predict_power_at_time(time, MSS, TAU, time_correction = 0, bodymass = 75, ...)
+
 predict_relative_power_at_distance(
   distance,
   MSS,
   TAU,
   time_correction = 0,
-  distance_correction = 0
+  distance_correction = 0,
+  bodymass = 75,
+  ...
 )
 
-predict_relative_power_at_time(time, MSS, TAU, time_correction = 0)
+predict_relative_power_at_time(
+  time,
+  MSS,
+  TAU,
+  time_correction = 0,
+  bodymass = 75,
+  ...
+)
 
-predict_kinematics(object, max_time = 6, frequency = 100)
+predict_kinematics(object, max_time = 6, frequency = 100, bodymass = 75, ...)
 }
 \arguments{
 \item{time, distance, velocity}{Numeric vectors}
@@ -71,6 +121,10 @@ predict_kinematics(object, max_time = 6, frequency = 100)
 \item{time_correction}{Numeric vector. Used for correction. Default is 0. See references for more info}
 
 \item{distance_correction}{Numeric vector. Used for correction. Default is 0. See vignettes for more info}
+
+\item{...}{Forwarded to \code{\link{get_air_resistance}} for the purpose of calculation of air resistance and power}
+
+\item{bodymass}{Body mass in kg. Used to calculate relative power and forwarded to \code{\link{get_air_resistance}}}
 
 \item{object}{\code{shorts_model} or \code{shorts_mixed_model} object}
 
@@ -104,7 +158,30 @@ df$velocity_at_distance <- predict_velocity_at_distance(df$distance_at_time, MSS
 df$acceleration_at_distance <- predict_acceleration_at_distance(df$distance_at_time, MSS, TAU)
 df$acceleration_at_velocity <- predict_acceleration_at_velocity(df$velocity_at_time, MSS, TAU)
 
+# Power calculation uses shorts::get_air_resistance function and its defaults
+# values to calculate power. Use the ... to setup your own parameters for power
+# calculations
+df$power_at_time <- predict_power_at_time(
+  time = df$time, MSS = MSS, TAU = TAU,
+  # Check shorts::get_air_resistance for available params
+  bodymass = 100, bodyheight = 1.85
+)
+
 df
+
+# Example for predict_kinematics
+split_times <- data.frame(
+  distance = c(5, 10, 20, 30, 35),
+  time = c(1.20, 1.96, 3.36, 4.71, 5.35)
+)
+
+# Simple model
+simple_model <- with(
+  split_times,
+  model_using_splits(distance, time)
+)
+
+predict_kinematics(simple_model)
 }
 \references{
 Haugen TA, Tønnessen E, Seiler SK. 2012. The Difference Is in the Start: Impact of Timing and Start

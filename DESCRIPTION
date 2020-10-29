@@ -3,14 +3,14 @@ Type: Package
 Title: Short Sprints
 Authors@R: 
     c(person(given = "Mladen",
-           family = "Jovanovic",
+           family = "Jovanović",
            role = c("aut", "cre"),
            email = "coach.mladen.jovanovic@gmail.com"),
       person(given = c("Jason", "D."),
            family = "Vescovi",
            role = c("dtc"),
            email = "vescovij@gmail.com"))
-Version: 1.1.2
+Version: 1.1.3
 Description: Create short sprint (<6sec) profiles using the split times or the radar gun data.
     Mono-exponential equation is used to estimate maximal sprinting speed (MSS), relative acceleration (TAU),
     and other parameters such us maximal acceleration (MAC) and maximal relative power (PMAX). These parameters 
@@ -31,9 +31,9 @@ Imports: stats, LambertW, nlme
 Suggests: knitr, rmarkdown, tidyverse
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-10-13 19:01:21 UTC; mladenjovanovic
-Author: Mladen Jovanovic [aut, cre],
+Packaged: 2020-10-29 15:04:36 UTC; mladenjovanovic
+Author: Mladen Jovanović [aut, cre],
   Jason D. Vescovi [dtc]
-Maintainer: Mladen Jovanovic <coach.mladen.jovanovic@gmail.com>
+Maintainer: Mladen Jovanović <coach.mladen.jovanovic@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-10-13 19:20:03 UTC
+Date/Publication: 2020-10-29 17:40:05 UTC

@@ -10,7 +10,7 @@ status](https://www.r-pkg.org/badges/version/shorts)](https://cran.r-project.org
 [![DOI](https://zenodo.org/badge/254907272.svg)](https://zenodo.org/badge/latestdoi/254907272)
 <!-- badges: end -->
 
-This package creates short sprint (\<6sec) profiles using the split
+This package creates short sprint (&lt;6sec) profiles using the split
 times, or the radar gun data. Mono-exponential equation is used to
 estimate maximal sprinting speed (MSS), relative acceleration (TAU), and
 other parameters. These parameters can be used to predict kinematic and
@@ -45,7 +45,7 @@ data("split_times", "radar_gun_data")
 To model sprint performance using split times, distance will be used as
 predictor and time as target. Since `split_times` contains data for
 multiple athletes, let’s extract only one athlete and model it using
-`shorts::model_using_splits` function.
+`shorts::model_using_splits()` function.
 
 ``` r
 kimberley_data <- filter(split_times, athlete == "Kimberley")
@@ -54,7 +54,7 @@ kable(kimberley_data)
 ```
 
 | athlete   | bodyweight | distance |  time |
-| :-------- | ---------: | -------: | ----: |
+|:----------|-----------:|---------:|------:|
 | Kimberley |         55 |        5 | 1.158 |
 | Kimberley |         55 |       10 | 1.893 |
 | Kimberley |         55 |       15 | 2.541 |
@@ -62,9 +62,9 @@ kable(kimberley_data)
 | Kimberley |         55 |       30 | 4.313 |
 | Kimberley |         55 |       40 | 5.444 |
 
-`shorts::model_using_splits` returns an object with `parameters`,
-`model_fit`, `model` returned from `stats::nls` function and `data` used
-to estimate parameters. Parameters estimated using mono-exponential
+`shorts::model_using_splits()` returns an object with `parameters`,
+`model_fit`, `model` returned from `stats::nls()` function and `data`
+used to estimate parameters. Parameters estimated using mono-exponential
 equation are *maximal sprinting speed* (MSS), and *relative
 acceleration* (TAU). Additional parameters computed from MSS and TAU are
 *maximal acceleration* (MAC) and *maximal relative power* (PMAX) (which
@@ -113,14 +113,14 @@ coef(kimberley_profile)
 ```
 
 To return the predicted outcome (in this case time variable), use
-`predict` function:
+`predict()` function:
 
 ``` r
 predict(kimberley_profile)
 #> [1] 1.21 1.90 2.52 3.12 4.30 5.47
 ```
 
-To create a simple plot, use S3 `plot` method:
+To create a simple plot, use S3 `plot()` method:
 
 ``` r
 plot(kimberley_profile) +
@@ -130,7 +130,7 @@ plot(kimberley_profile) +
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="90%" style="display: block; margin: auto;" />
 
 If you are interested in calculating average split velocity, use
-`shorts::format_splits`
+`shorts::format_splits()`
 
 ``` r
 kable(shorts::format_splits(
@@ -139,7 +139,7 @@ kable(shorts::format_splits(
 ```
 
 | split | split\_distance\_start | split\_distance\_stop | split\_distance | split\_time\_start | split\_time\_stop | split\_time | split\_mean\_velocity |
-| ----: | ---------------------: | --------------------: | --------------: | -----------------: | ----------------: | ----------: | --------------------: |
+|------:|-----------------------:|----------------------:|----------------:|-------------------:|------------------:|------------:|----------------------:|
 |     1 |                      0 |                     5 |               5 |                  0 |             1.158 |       1.158 |            4.317789…. |
 |     2 |                      5 |                    10 |               5 |              1.158 |             1.893 |       0.735 |            6.802721…. |
 |     3 |                     10 |                    15 |               5 |              1.893 |             2.541 |       0.648 |            7.716049…. |
@@ -148,8 +148,8 @@ kable(shorts::format_splits(
 |     6 |                     30 |                    40 |              10 |              4.313 |             5.444 |       1.131 |            8.841732…. |
 
 Let’s plot observed vs fitted split times. For this we can use `data`
-returned from `shorts::model_using_splits` since it contains `pred_time`
-column.
+returned from `shorts::model_using_splits()` since it contains
+`pred_time` column.
 
 ``` r
 ggplot(kimberley_profile$data, aes(x = distance)) +
@@ -163,10 +163,10 @@ ggplot(kimberley_profile$data, aes(x = distance)) +
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" />
 
 To plot predicted velocity, acceleration, air resistance, force, and
-power over distance, use `shorts:predict_`. Please note that to
+power over distance, use `shorts:predict_XXX()`. Please note that to
 calculate force, air resistance, and power, we need Kimberley’s bodymass
 and height (as well as other characteristics such as air pressure,
-temperature and wind - see `get_air_resistance` function).
+temperature and wind - see `get_air_resistance()` function).
 
 ``` r
 kimberley_bodymass <- 60 # in kilograms
@@ -225,7 +225,7 @@ ggplot(kimberley_pred, aes(x = distance, y = value)) +
 
 <img src="man/figures/README-unnamed-chunk-8-1.png" width="90%" style="display: block; margin: auto;" />
 
-To do prediction simpler, use `shorts::predict_kinematics` function.
+To do prediction simpler, use `shorts::predict_kinematics()` function.
 This will provide kinetics and kinematics for 0-6s sprint using 100Hz.
 
 ``` r
@@ -238,7 +238,7 @@ kable(head(predicted_kinematics))
 ```
 
 | time | distance | velocity | acceleration | bodymass | net\_horizontal\_force | air\_resistance | horizontal\_force | horizontal\_force\_relative | vertical\_force | resultant\_force | resultant\_force\_relative | power | relative\_power |    RF | force\_angle |
-| ---: | -------: | -------: | -----------: | -------: | ---------------------: | --------------: | ----------------: | --------------------------: | --------------: | ---------------: | -------------------------: | ----: | --------------: | ----: | -----------: |
+|-----:|---------:|---------:|-------------:|---------:|-----------------------:|----------------:|------------------:|----------------------------:|----------------:|-----------------:|---------------------------:|------:|----------------:|------:|-------------:|
 | 0.00 |    0.000 |    0.000 |        10.59 |       60 |                    635 |           0.000 |               635 |                       10.59 |             589 |              866 |                       14.4 |     0 |            0.00 | 0.734 |         42.8 |
 | 0.01 |    0.001 |    0.105 |        10.46 |       60 |                    628 |           0.003 |               628 |                       10.46 |             589 |              860 |                       14.3 |    66 |            1.10 | 0.729 |         43.2 |
 | 0.02 |    0.002 |    0.209 |        10.33 |       60 |                    620 |           0.011 |               620 |                       10.33 |             589 |              855 |                       14.2 |   130 |            2.16 | 0.725 |         43.5 |
@@ -246,14 +246,14 @@ kable(head(predicted_kinematics))
 | 0.04 |    0.008 |    0.413 |        10.08 |       60 |                    605 |           0.041 |               605 |                       10.08 |             589 |              844 |                       14.1 |   250 |            4.17 | 0.717 |         44.2 |
 | 0.05 |    0.013 |    0.513 |         9.96 |       60 |                    597 |           0.063 |               597 |                        9.96 |             589 |              839 |                       14.0 |   307 |            5.11 | 0.712 |         44.6 |
 
-To get model residuals, use `residuals` function:
+To get model residuals, use `residuals()` function:
 
 ``` r
 residuals(kimberley_profile)
 #> [1]  0.05293  0.00402 -0.01997 -0.02699 -0.01376  0.02232
 ```
 
-Package `shorts` comes with `find_` family of functions that allow
+Package `shorts` comes with `find_XXX()` family of functions that allow
 finding peak power and it’s location, as well as *critical distance*
 over which velocity, acceleration, or power drops below certain
 threshold:
@@ -302,8 +302,8 @@ shorts::find_velocity_critical_distance(
 #### Mixed-effect models
 
 Each individual can be modeled separately, or we can perform *non-linear
-mixed model* using `nlme` function from *nlme* package (Pinheiro *et
-al.*, 2019). This is done using `shorts::mixed_model_using_splits`:
+mixed model* using `nlme()` function from *nlme* package (Pinheiro *et
+al.*, 2019). This is done using `shorts::mixed_model_using_splits()`:
 
 ``` r
 mixed_model <- shorts::mixed_model_using_splits(
@@ -338,7 +338,7 @@ mixed_model
 summary(mixed_model)
 #> Nonlinear mixed-effects model fit by maximum likelihood
 #>   Model: corrected_time ~ TAU * I(LambertW::W(-exp(1)^(-distance/(MSS *      TAU) - 1))) + distance/MSS + TAU 
-#>  Data: train 
+#>   Data: train 
 #>     AIC   BIC logLik
 #>   -75.1 -66.7   43.5
 #> 
@@ -351,7 +351,7 @@ summary(mixed_model)
 #> TAU      0.178  0.877
 #> Residual 0.026       
 #> 
-#> Fixed effects: MSS + TAU ~ 1 
+#> Fixed effects:  MSS + TAU ~ 1 
 #>     Value Std.Error DF t-value p-value
 #> MSS  8.06     0.495 24   16.30       0
 #> TAU  0.66     0.084 24    7.82       0
@@ -388,19 +388,18 @@ plot(mixed_model) +
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" />
 
 ``` r
-
 kable(mixed_model$parameters$random)
 ```
 
 | athlete   |  MSS |   TAU |  MAC | PMAX | time\_correction | distance\_correction |
-| :-------- | ---: | ----: | ---: | ---: | ---------------: | -------------------: |
+|:----------|-----:|------:|-----:|-----:|-----------------:|---------------------:|
 | James     | 9.69 | 0.847 | 11.4 | 27.7 |                0 |                    0 |
 | Jim       | 7.83 | 0.505 | 15.5 | 30.4 |                0 |                    0 |
 | John      | 7.78 | 0.727 | 10.7 | 20.8 |                0 |                    0 |
 | Kimberley | 8.57 | 0.802 | 10.7 | 22.9 |                0 |                    0 |
 | Samantha  | 6.45 | 0.395 | 16.3 | 26.4 |                0 |                    0 |
 
-`shorts::mixed_model_using_splits` return the similar object, but
+`shorts::mixed_model_using_splits()` return the similar object, but
 `parameters` contain two elements: `fixed` and `random`.
 
 Let’s plot predicted velocity over distance for athletes in the
@@ -428,9 +427,9 @@ ggplot(velocity_over_distance, aes(x = distance, y = pred_velocity, color = athl
 
 <img src="man/figures/README-unnamed-chunk-13-1.png" width="90%" style="display: block; margin: auto;" />
 
-To modify random effects, which are by default `MSS` and `TAU` (`MSS +
-TAU ~ 1`), use the `random` parameter. For example, we can assume same
-`TAU` for all athletes and only use `MSS` as random effect:
+To modify random effects, which are by default `MSS` and `TAU`
+(`MSS + TAU ~ 1`), use the `random` parameter. For example, we can
+assume same `TAU` for all athletes and only use `MSS` as random effect:
 
 ``` r
 mixed_model <- shorts::mixed_model_using_splits(
@@ -468,7 +467,7 @@ mixed_model
 
 The radar gun data is modeled using measured velocity as target variable
 and time as predictor. Individual analysis is performed using
-`shorts::model_using_radar` function. Let’s do analysis for Jim:
+`shorts::model_using_radar()` function. Let’s do analysis for Jim:
 
 ``` r
 jim_data <- filter(radar_gun_data, athlete == "Jim")
@@ -513,8 +512,8 @@ plot(jim_profile) +
 
 <img src="man/figures/README-unnamed-chunk-15-1.png" width="90%" style="display: block; margin: auto;" />
 
-The object returned from `shorts::model_using_radar` is same as object
-returned from `shorts::model_using_splits`. Let’s plot Jim’s measured
+The object returned from `shorts::model_using_radar()` is same as object
+returned from `shorts::model_using_splits()`. Let’s plot Jim’s measured
 velocity and predicted velocity:
 
 ``` r
@@ -529,7 +528,7 @@ ggplot(jim_profile$data, aes(x = time)) +
 <img src="man/figures/README-unnamed-chunk-16-1.png" width="90%" style="display: block; margin: auto;" />
 
 Radar gun data can be modeled individually or using *non-linear mixed
-model* implemented in `shorts::mixed_model_using_radar`:
+model* implemented in `shorts::mixed_model_using_radar()`:
 
 ``` r
 mixed_model <- shorts::mixed_model_using_radar(
@@ -564,7 +563,7 @@ mixed_model
 summary(mixed_model)
 #> Nonlinear mixed-effects model fit by maximum likelihood
 #>   Model: velocity ~ MSS * (1 - exp(1)^(-(corrected_time)/TAU)) 
-#>  Data: train 
+#>   Data: train 
 #>     AIC   BIC logLik
 #>   -9150 -9114   4581
 #> 
@@ -577,7 +576,7 @@ summary(mixed_model)
 #> TAU      0.2050 0.811
 #> Residual 0.0516      
 #> 
-#> Fixed effects: MSS + TAU ~ 1 
+#> Fixed effects:  MSS + TAU ~ 1 
 #>     Value Std.Error   DF t-value p-value
 #> MSS  8.30     0.521 2994    15.9       0
 #> TAU  1.01     0.092 2994    11.0       0
@@ -599,12 +598,11 @@ plot(mixed_model) +
 <img src="man/figures/README-unnamed-chunk-17-1.png" width="90%" style="display: block; margin: auto;" />
 
 ``` r
-
 kable(mixed_model$parameters$random)
 ```
 
 | athlete   |   MSS |   TAU |  MAC | PMAX | time\_correction | distance\_correction |
-| :-------- | ----: | ----: | ---: | ---: | ---------------: | -------------------: |
+|:----------|------:|------:|-----:|-----:|-----------------:|---------------------:|
 | James     | 10.00 | 1.111 | 9.00 | 22.5 |                0 |                    0 |
 | Jim       |  8.00 | 0.889 | 9.00 | 18.0 |                0 |                    0 |
 | John      |  8.00 | 1.069 | 7.48 | 15.0 |                0 |                    0 |
@@ -629,7 +627,7 @@ ggplot(model_predictions, aes(x = time, y = acceleration, color = athlete)) +
 ### Force-Velocity Profiling
 
 To estimate Force-Velocity profile using approach by Samozino *et al.*
-(2016), use `get_FV_profile`:
+(2016), use `shorts::get_FV_profile()`:
 
 ``` r
 kimberley_fv <- shorts::get_FV_profile(
@@ -710,7 +708,7 @@ mixed_model_corrected
 summary(mixed_model_corrected)
 #> Nonlinear mixed-effects model fit by maximum likelihood
 #>   Model: corrected_time ~ TAU * I(LambertW::W(-exp(1)^(-distance/(MSS *      TAU) - 1))) + distance/MSS + TAU 
-#>  Data: train 
+#>   Data: train 
 #>     AIC   BIC logLik
 #>   -96.9 -88.5   54.5
 #> 
@@ -723,7 +721,7 @@ summary(mixed_model_corrected)
 #> TAU      0.2779 0.924
 #> Residual 0.0152      
 #> 
-#> Fixed effects: MSS + TAU ~ 1 
+#> Fixed effects:  MSS + TAU ~ 1 
 #>     Value Std.Error DF t-value p-value
 #> MSS  8.47     0.616 24   13.76       0
 #> TAU  1.15     0.129 24    8.93       0
@@ -745,20 +743,19 @@ plot(mixed_model_corrected) +
 <img src="man/figures/README-unnamed-chunk-20-1.png" width="90%" style="display: block; margin: auto;" />
 
 ``` r
-
 kable(mixed_model_corrected$parameters$random)
 ```
 
 | athlete   |   MSS |   TAU |  MAC | PMAX | time\_correction | distance\_correction |
-| :-------- | ----: | ----: | ---: | ---: | ---------------: | -------------------: |
+|:----------|------:|------:|-----:|-----:|-----------------:|---------------------:|
 | James     | 10.55 | 1.495 | 7.05 | 18.6 |              0.3 |                    0 |
 | Jim       |  8.05 | 0.922 | 8.73 | 17.6 |              0.3 |                    0 |
 | John      |  8.13 | 1.230 | 6.61 | 13.4 |              0.3 |                    0 |
 | Kimberley |  9.12 | 1.372 | 6.64 | 15.1 |              0.3 |                    0 |
 | Samantha  |  6.53 | 0.756 | 8.64 | 14.1 |              0.3 |                    0 |
 
-And `time_correction` can also be used in `predict_` and `find_` family
-of functions:
+And `time_correction` can also be used in `predict_XXX()` and
+`find_XXX()` family of functions:
 
 ``` r
 velocity_over_distance_corrected <- merge(
@@ -784,8 +781,8 @@ ggplot(velocity_over_distance_corrected, aes(x = distance, y = pred_velocity, co
 <img src="man/figures/README-unnamed-chunk-21-1.png" width="90%" style="display: block; margin: auto;" />
 
 Instead of providing for `time_correction`, this parameter can be
-estimated using `shorts::model_using_splits_with_time_correction` and
-`shorts::mixed_model_using_splits_with_time_correction`:
+estimated using `shorts::model_using_splits_with_time_correction()` and
+`shorts::mixed_model_using_splits_with_time_correction()`:
 
 ``` r
 kimberley_profile_with_time_correction <- shorts::model_using_splits_with_time_correction(
@@ -845,12 +842,11 @@ plot(mixed_model_with_time_correction) +
 <img src="man/figures/README-unnamed-chunk-22-1.png" width="90%" style="display: block; margin: auto;" />
 
 ``` r
-
 kable(mixed_model_with_time_correction$parameters$random)
 ```
 
 | athlete   |   MSS |   TAU |   MAC | PMAX | time\_correction | distance\_correction |
-| :-------- | ----: | ----: | ----: | ---: | ---------------: | -------------------: |
+|:----------|------:|------:|------:|-----:|-----------------:|---------------------:|
 | James     | 10.19 | 1.243 |  8.20 | 20.9 |            0.199 |                    0 |
 | Jim       |  7.95 | 0.764 | 10.40 | 20.7 |            0.199 |                    0 |
 | John      |  8.00 | 1.049 |  7.62 | 15.2 |            0.199 |                    0 |
@@ -862,7 +858,7 @@ For more details, please refer to `sprint-corrections`
 
 ### Leave-One-Out Cross-Validation (LOOCV)
 
-`...model_using_splits..` family of functions come with LOOCV feature
+`...model_using_splits..()` family of functions come with LOOCV feature
 that is performed by setting the function parameter `LOOCV = TRUE`. This
 feature is very useful for checking model parameters robustness and
 model predictions on unseen data. LOOCV involve iterative model building
@@ -979,16 +975,15 @@ ggplot(plot_data, aes(x = time, y = LOOCV_velocity, group = LOOCV)) +
 
 ## Publications
 
-Here are the submitted publications using the  package:
-
 1.  Jovanović, M., Vescovi, J.D. (2020). **shorts: An R Package for
-    Modeling Short Sprints**. Submitted to *Journal of Statistical
-    Software*
+    Modeling Short Sprints**. Preprint available at *SportRxiv*.
+    <https://doi.org/10.31236/osf.io/4jw62>
 
-2.  Vescovi, J.D., Jovanović, M. (2020). **Sprint mechanical
-    characteristics of female soccer players: A novel approach for
-    correction of timing gate starts**. Submitted to *Frontiers in
-    Sports and Active Living*
+2.  Vescovi, JD and Jovanović, M. **Sprint Mechanical Characteristics of
+    Female Soccer Players: A Retrospective Pilot Study to Examine a
+    Novel Approach for Correction of Timing Gate Starts.** *Front Sports
+    Act Living 3: 629694, 2021.*
+    <https://doi.org/10.3389/fspor.2021.629694>
 
 ## Citation
 

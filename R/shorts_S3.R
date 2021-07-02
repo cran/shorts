@@ -109,7 +109,7 @@ print.shorts_model <- function(x, ...) {
   cat("--------------------\n")
   print(unlist(x$model_fit))
 
-  if(!is.null(x$LOOCV)){
+  if (!is.null(x$LOOCV)) {
     cat("\n\nLeave-One-Out Cross-Validation\n")
     cat("------------------------------\n")
 
@@ -164,14 +164,14 @@ print.shorts_mixed_model <- function(x, ...) {
   print(unlist(x$parameters$fixed))
 
   cat("\nEstimated random model parameters\n")
-  cat("----------------------------------\n")
+  cat("---------------------------------\n")
   print(x$parameters$random)
 
   cat("\nModel fit estimators\n")
   cat("--------------------\n")
   print(unlist(x$model_fit))
 
-  if(!is.null(x$LOOCV)){
+  if (!is.null(x$LOOCV)) {
     cat("\n\nLeave-One-Out Cross-Validation\n")
     cat("------------------------------\n")
 
@@ -220,7 +220,7 @@ summary.shorts_mixed_model <- function(object, ...) {
 #' residuals(simple_model)
 #' @export
 residuals.shorts_model <- function(object, ...) {
-  object$data[[4]] - object$data[[2]]
+  object$data[[2]] - object$data[[4]]
 }
 
 
@@ -240,7 +240,7 @@ residuals.shorts_model <- function(object, ...) {
 #' residuals(mixed_model)
 #' @export
 residuals.shorts_mixed_model <- function(object, ...) {
-  object$data[[4]] - object$data[[3]]
+  object$data[[3]] - object$data[[4]]
 }
 
 #' S3 method for printing \code{shorts_fv_profile} object
@@ -255,13 +255,14 @@ residuals.shorts_mixed_model <- function(object, ...) {
 #'   MSS = m1$parameters$MSS,
 #'   TAU = m1$parameters$TAU,
 #'   bodyheight = 1.72,
-#'   bodymass = 120)
+#'   bodymass = 120
+#' )
 #'
 #' print(fv_profile)
 #' @export
 print.shorts_fv_profile <- function(x, ...) {
   cat("Estimated Force-Velocity Profile\n")
-  cat("--------------------------\n")
+  cat("--------------------------------\n")
   print(unlist(x[-13]))
 }
 
@@ -280,7 +281,8 @@ print.shorts_fv_profile <- function(x, ...) {
 #'   MSS = m1$parameters$MSS,
 #'   TAU = m1$parameters$TAU,
 #'   bodyheight = 1.72,
-#'   bodymass = 120)
+#'   bodymass = 120
+#' )
 #'
 #' plot(fv_profile)
 #' plot(fv_profile, "time")
@@ -292,8 +294,8 @@ plot.shorts_fv_profile <- function(x, type = "velocity", ...) {
   value <- NULL
   # +++++++++++++++++++++++++++++++++++++++++++
 
-  if(!any(type %in% c("velocity", "time"))) {
-    stop("Please use either 'force' and 'velocity' type plot.", call. = FALSE)
+  if (!any(type %in% c("velocity", "time"))) {
+    stop("Please use either 'time' or 'velocity' type plot.", call. = FALSE)
   }
 
   plot_data <- x$data
@@ -323,7 +325,8 @@ plot.shorts_fv_profile <- function(x, type = "velocity", ...) {
       "net_horizontal_force", "air_resistance", "horizontal_force", "horizontal_force_relative",
       "vertical_force", "resultant_force", "resultant_force_relative", "power",
       "relative_power", "RF", "force_angle"
-    ))
+    )
+  )
 
   gg <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = value)) +
     ggplot2::geom_line(color = "black") +
@@ -403,7 +406,6 @@ plot.shorts_model <- function(x, type = NULL, ...) {
       distance_correction = x$parameters$distance_correction
     )
     df$power <- df$velocity * df$acceleration
-
   } else {
     # This is radar model
     df <- data.frame(
@@ -432,7 +434,8 @@ plot.shorts_model <- function(x, type = NULL, ...) {
   plot_data <- tidyr::pivot_longer(df, cols = -1, names_to = "variable", values_to = "value")
   plot_data$variable <- factor(
     plot_data$variable,
-    levels = c("acceleration", "velocity", "power"))
+    levels = c("acceleration", "velocity", "power")
+  )
 
   gg <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = value, color = variable)) +
     ggplot2::geom_line(alpha = 0.8) +
@@ -500,7 +503,6 @@ plot.shorts_mixed_model <- function(x, type = NULL, ...) {
     )
 
     df$power <- df$velocity * df$acceleration
-
   } else {
     # This is radar model
     df <- tidyr::expand_grid(
@@ -530,7 +532,8 @@ plot.shorts_mixed_model <- function(x, type = NULL, ...) {
   plot_data <- tidyr::pivot_longer(df, cols = -(1:8), names_to = "variable", values_to = "value")
   plot_data$variable <- factor(
     plot_data$variable,
-    levels = c("acceleration", "velocity", "power"))
+    levels = c("acceleration", "velocity", "power")
+  )
 
   gg <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = value, color = variable)) +
     ggplot2::geom_line(alpha = 0.8) +

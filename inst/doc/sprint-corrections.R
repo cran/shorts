@@ -183,14 +183,14 @@ split_kinematics$name <- factor(
 
 split_kinematics$difference <- with(
   split_kinematics,
-  predicted_time - time
+  time - predicted_time
 )
 
 ggplot(split_kinematics, aes(x = distance, y = difference, color = name)) +
   theme_minimal() +
   geom_point(alpha = 0.8) +
   geom_line(alpha = 0.8) +
-  ylab("Predicted - observed")
+  ylab("Observed - Predicted")
 
 ## -----------------------------------------------------------------------------
 jack_params_with_correction <- with(
@@ -215,7 +215,7 @@ jack_split_kinematics_corrected$predicted_time <- shorts::predict_time_at_distan
 
 jack_split_kinematics_corrected$difference <- with(
   jack_split_kinematics_corrected,
-  predicted_time - time
+  time - predicted_time
 )
 
 jack_split_kinematics_corrected$name <- "Jack w/0.3s correction"
@@ -229,7 +229,7 @@ ggplot(split_kinematics, aes(x = distance, y = difference, color = name)) +
   theme_minimal() +
   geom_point(alpha = 0.8) +
   geom_line(alpha = 0.8) +
-  ylab("Predicted - observed")
+  ylab("Observed - Predicted")
 
 ## -----------------------------------------------------------------------------
 jack_param_with_estimated_time_correction <- with(
@@ -254,7 +254,7 @@ jack_split_kinematics_corrected_est$predicted_time <- shorts::predict_time_at_di
 
 jack_split_kinematics_corrected_est$difference <- with(
   jack_split_kinematics_corrected_est,
-  predicted_time - time
+  time - predicted_time
 )
 
 jack_split_kinematics_corrected_est$name <- "Jack w/est. correction"
@@ -268,7 +268,7 @@ ggplot(split_kinematics, aes(x = distance, y = difference, color = name)) +
   theme_minimal() +
   geom_point(alpha = 0.8) +
   geom_line(alpha = 0.8) +
-  ylab("Predicted - observed")
+  ylab("Observed - Predicted")
 
 ## -----------------------------------------------------------------------------
 jack_param_with_estimated_distance_correction <- with(
@@ -294,7 +294,7 @@ jack_split_kinematics_corrected_est_dist$predicted_time <- shorts::predict_time_
 
 jack_split_kinematics_corrected_est_dist$difference <- with(
   jack_split_kinematics_corrected_est_dist,
-  predicted_time - time
+  time - predicted_time
 )
 
 jack_split_kinematics_corrected_est_dist$name <- "Jack w/est. distance correction"
@@ -308,7 +308,7 @@ ggplot(split_kinematics, aes(x = distance, y = difference, color = name)) +
   theme_minimal() +
   geom_point(alpha = 0.8) +
   geom_line(alpha = 0.8) +
-  ylab("Predicted - observed")
+  ylab("Observed - Predicted")
 
 ## -----------------------------------------------------------------------------
 # Add small noise to the data so the model with distance and time corrected can be fitted

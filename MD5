@@ -1,7 +1,7 @@
-7d8ea79241c1c8c9f45bf1f7d6713f5c *DESCRIPTION
+3e2e770a7d3da0af250fff0bdf15406f *DESCRIPTION
 e4cdb35b11fe2f41ccc7ecfffb47b17a *LICENSE
 533d038e327b167816fae5c92d9e3649 *NAMESPACE
-4b5d6ecb2f1104b8666c88cd32147372 *NEWS.md
+9f025b099e790328b21c52821b5e9f67 *NEWS.md
 8cf9161d4b3e8eca46ca9d67983ee832 *R/find_functions.R
 f99f7c063b59a8718770cb8e6dc74889 *R/format_splits.R
 0eca7a1d485223b50ded93be821b58e8 *R/get_FV_profile.R
@@ -10,8 +10,8 @@ e790051cd5418bb23cfbf4388da5f8bf *R/get_air_resistance.R
 d5ce90810aa752cdcc859e73191634d4 *R/mixed_model_using_radar.R
 05a83fdf159f30a2a026a4861eb1a17d *R/mixed_model_using_splits.R
 bfe6ef7f66971bac17f05317e4cd470a *R/model_using_radar.R
-e3df895d5220b483bbaba66bca303805 *R/model_using_splits.R
-2278208169be585edefbc3d2396c2de5 *R/predict_functions.R
+5ba363f8bc1fbda982d17cd3f678c988 *R/model_using_splits.R
+7e36baeeb8d6da14670fb1e5b79c93c8 *R/predict_functions.R
 6f012e3567a48ee598ed459a0856ba04 *R/radar_gun_data.R
 eee9175835228c6e45f98ffe63e0e405 *R/shorts_S3.R
 a2d78e6bb68cccdad4dcb5e170aff4e0 *R/shorts_constructors.R
@@ -24,7 +24,7 @@ abbb2beebe7b461a661c4d6380d720a6 *README.md
 1216afa06fa05a151cf8e045f2f28fdc *data/radar_gun_data.rda
 cf498fc88ba51fc5d76e6f31f7dc1228 *data/split_times.rda
 6b2d7ccb2860db92aeb58bebdbb07fdf *data/vescovi.rda
-cc263857037ec213d8deb76801d1602d *inst/CITATION
+f9dd766f2b09e9930dc23e6b009e0979 *inst/CITATION
 7138829a0000c87dffab7d2e434a64b6 *inst/doc/sprint-corrections.R
 e10d1f22ea25130faf85cd1ff7e8599d *inst/doc/sprint-corrections.Rmd
 bc2c31245e51982959eedfcd5e3f00f8 *inst/doc/sprint-corrections.html
@@ -62,13 +62,13 @@ cdc9a7675d9063e7179a2ebecc9ae2f6 *man/get_FV_profile.Rd
 751db11c74f5f14385d75396231b5728 *man/mixed_model_radar.Rd
 be486a4a122920b5f6b50c0624b52eb6 *man/mixed_model_split_times.Rd
 6adbe29c736cc613f6b11a3d2dc44cac *man/model_radar.Rd
-c077ee5005d7f24721c82084e8a98d42 *man/model_split_times.Rd
+d11ec71ef7fcc4dde92e6163db3fc273 *man/model_split_times.Rd
 f14e634d337fe60f61d7d9a5f3115723 *man/plot.shorts_fv_profile.Rd
 6679fa72fc9ee32ba37fc164c39b4898 *man/plot.shorts_mixed_model.Rd
 a40a81e1a7577b29f8445a0c09f4327b *man/plot.shorts_model.Rd
 d86b2e08b44d1dc45952b50a9699b792 *man/predict.shorts_mixed_model.Rd
 caa713e8a9434d80221e3e153491fe20 *man/predict.shorts_model.Rd
-a4207e154753af0a59719bd9fc1565b4 *man/predict_kinematics.Rd
+6a8c5ba80493af4a7fb437be3f100f1f *man/predict_kinematics.Rd
 c97b7e7b5271ed16cfdeb83b55c1224c *man/print.shorts_fv_profile.Rd
 c11b0869f336105a290b2505085976a3 *man/print.shorts_mixed_model.Rd
 1bb69f7e2c87a5520696cfbcfbf658d6 *man/print.shorts_model.Rd

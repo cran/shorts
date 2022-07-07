@@ -1,6 +1,6 @@
 #' Get Air Resistance
 #'
-#' \code{get_air_resistance} estimates air resitance in Newtons
+#' \code{get_air_resistance} estimates air resistance in Newtons
 #'
 #' @param velocity Instantaneous running velocity in meters per second (m/s)
 #' @param bodymass In kilograms (kg)

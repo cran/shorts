@@ -8,7 +8,7 @@
 #'         \item{bodymass}{Returned \code{bodymass} used in FV profiling}
 #'         \item{F0}{Horizontal force when velocity=0}
 #'         \item{F0_rel}{\code{F0} divided by \code{bodymass}}
-#'         \item{V0}{Velocity when horizonatl force=0}
+#'         \item{V0}{Velocity when horizontal force=0}
 #'         \item{Pmax}{Maximal horizontal power}
 #'         \item{Pmax_rel}{\code{Pmax} divided by \code{bodymass}}
 #'         \item{FV_slope}{Slope of the FV profile. See References for more info}
@@ -29,11 +29,11 @@
 #' @examples
 #' data("jb_morin")
 #'
-#' m1 <- model_using_radar_with_time_correction(time = jb_morin$time, velocity = jb_morin$velocity)
+#' m1 <- model_radar_gun(time = jb_morin$time, velocity = jb_morin$velocity)
 #'
-#' fv_profile <- get_FV_profile(
+#' fv_profile <- make_FV_profile(
 #'   MSS = m1$parameters$MSS,
-#'   TAU = m1$parameters$TAU,
+#'   MAC = m1$parameters$MAC,
 #'   bodyheight = 1.72,
 #'   bodymass = 120
 #' )
@@ -41,13 +41,13 @@
 #' print(fv_profile)
 #' plot(fv_profile)
 #' plot(fv_profile, "time")
-get_FV_profile <- function(MSS,
-                           TAU,
-                           bodymass = 75,
-                           max_time = 6,
-                           frequency = 100,
-                           RFmax_cutoff = 0.3,
-                           ...) {
+make_FV_profile <- function(MSS,
+                            MAC,
+                            bodymass = 75,
+                            max_time = 6,
+                            frequency = 100,
+                            RFmax_cutoff = 0.3,
+                            ...) {
 
   # Create 0-max_time sample
   df <- data.frame(time = seq(0, 6, length.out = frequency * max_time))
@@ -57,13 +57,13 @@ get_FV_profile <- function(MSS,
   df$velocity <- predict_velocity_at_time(
     time = df$time,
     MSS = MSS,
-    TAU = TAU
+    MAC = MAC
   )
 
   df$acceleration <- predict_acceleration_at_time(
     time = df$time,
     MSS = MSS,
-    TAU = TAU
+    MAC = MAC
   )
 
   df$bodymass <- bodymass
@@ -73,14 +73,14 @@ get_FV_profile <- function(MSS,
   df$air_resistance <- predict_air_resistance_at_time(
     time = df$time,
     MSS = MSS,
-    TAU = TAU,
+    MAC = MAC,
     bodymass = bodymass, ...
   )
 
   df$horizontal_force <- predict_force_at_time(
     time = df$time,
     MSS = MSS,
-    TAU = TAU,
+    MAC = MAC,
     bodymass = bodymass, ...
   )
   df$horizontal_force_relative <- df$horizontal_force / bodymass

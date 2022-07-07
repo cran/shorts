@@ -3,9 +3,7 @@
 #' Family of functions that serve a purpose of finding maximal value and critical distances and times
 #'     at which power, acceleration or velocity drops below certain threshold.
 #'
-#' @param time_correction Numeric vector. Used for correction. Default is 0. See references for more info
-#' @param distance_correction Numeric vector. Used for correction. Default is 0. See vignettes for more info
-#' @param MSS,TAU Numeric vectors. Model parameters
+#' @param MSS,MAC Numeric vectors. Model parameters
 #' @param percent Numeric vector. Used to calculate critical distance. Default is 0.9
 #' @param ... Forwarded to \code{\link{predict_power_at_distance}} for the purpose of calculation of air resistance
 #' @references
@@ -22,20 +20,20 @@
 #' velocity <- predict_velocity_at_distance(
 #'   distance = dist,
 #'   MSS = 10,
-#'   TAU = 0.9
+#'   MAC = 9
 #' )
 #'
 #' acceleration <- predict_acceleration_at_distance(
 #'   distance = dist,
 #'   MSS = 10,
-#'   TAU = 0.9
+#'   MAC = 9
 #' )
 #'
 #' # Use ... to forward parameters to the shorts::get_air_resistance
 #' pwr <- predict_relative_power_at_distance(
 #'   distance = dist,
 #'   MSS = 10,
-#'   TAU = 0.9
+#'   MAC = 9
 #'   # bodyweight = 100,
 #'   # bodyheight = 1.9,
 #'   # barometric_pressure = 760,
@@ -46,19 +44,19 @@
 #' # Find critical distance when 90% of MSS is reached
 #' plot(x = dist, y = velocity, type = "l")
 #' abline(h = 10 * 0.9, col = "gray")
-#' abline(v = find_velocity_critical_distance(MSS = 10, TAU = 0.9), col = "red")
+#' abline(v = find_velocity_critical_distance(MSS = 10, MAC = 9), col = "red")
 #'
 #' # Find critical distance when 20% of MAC is reached
 #' plot(x = dist, y = acceleration, type = "l")
 #' abline(h = (10 / 0.9) * 0.2, col = "gray")
-#' abline(v = find_acceleration_critical_distance(MSS = 10, TAU = 0.9, percent = 0.2), col = "red")
+#' abline(v = find_acceleration_critical_distance(MSS = 10, MAC = 9, percent = 0.2), col = "red")
 #'
 #' # Find max power and location of max power
 #' plot(x = dist, y = pwr, type = "l")
 #'
 #' max_pwr <- find_max_power_distance(
 #'   MSS = 10,
-#'   TAU = 0.9
+#'   MAC = 9
 #'   # Use ... to forward parameters to the shorts::get_air_resistance
 #' )
 #' abline(h = max_pwr$max_power, col = "gray")
@@ -67,7 +65,7 @@
 #' # Find distance in which relative power stays over 75% of PMAX'
 #' plot(x = dist, y = pwr, type = "l")
 #' abline(h = max_pwr$max_power * 0.75, col = "gray")
-#' pwr_zone <- find_power_critical_distance(MSS = 10, TAU = 0.9, percent = 0.75)
+#' pwr_zone <- find_power_critical_distance(MSS = 10, MAC = 9, percent = 0.75)
 #' abline(v = pwr_zone$lower, col = "blue")
 #' abline(v = pwr_zone$upper, col = "blue")
 #' @name find_functions
@@ -79,15 +77,13 @@ NULL
 #' @return \code{find_max_power_distance} returns list with two elements: \code{max_power}
 #'    and \code{distance} at which max power occurs
 #' @export
-find_max_power_distance <- function(MSS, TAU, time_correction = 0, distance_correction = 0, ...) {
+find_max_power_distance <- function(MSS, MAC, ...) {
   max_power <- stats::optimize(
     function(x) {
       predict_power_at_distance(
         distance = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
-        distance_correction = distance_correction,
+        MAC = MAC,
         ...
       )
     },
@@ -107,14 +103,13 @@ find_max_power_distance <- function(MSS, TAU, time_correction = 0, distance_corr
 #' @return \code{find_max_power_time} returns list with two elements: \code{max_power} and
 #'     \code{time} at which max power occurs
 #' @export
-find_max_power_time <- function(MSS, TAU, time_correction = 0, ...) {
+find_max_power_time <- function(MSS, MAC, ...) {
   max_power <- stats::optimize(
     function(x) {
       predict_power_at_time(
         time = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
+        MAC = MAC,
         ...
       )
     },
@@ -133,15 +128,13 @@ find_max_power_time <- function(MSS, TAU, time_correction = 0, ...) {
 #' @description \code{find_velocity_critical_distance} finds critical distance at which \code{percent}
 #'     of \code{MSS} is achieved
 #' @export
-find_velocity_critical_distance <- function(MSS, TAU, time_correction = 0, distance_correction = 0, percent = 0.9) {
+find_velocity_critical_distance <- function(MSS, MAC, percent = 0.9) {
   critical_distance <- stats::optimize(
     function(x) {
       velocity <- predict_velocity_at_distance(
         distance = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
-        distance_correction = distance_correction
+        MAC = MAC
       )
 
       abs((velocity / MSS) - percent) * x
@@ -156,14 +149,13 @@ find_velocity_critical_distance <- function(MSS, TAU, time_correction = 0, dista
 #' @description \code{find_velocity_critical_time} finds critical time at which \code{percent} of \code{MSS}
 #'     is achieved
 #' @export
-find_velocity_critical_time <- function(MSS, TAU, time_correction = 0, percent = 0.9) {
+find_velocity_critical_time <- function(MSS, MAC, percent = 0.9) {
   critical_distance <- stats::optimize(
     function(x) {
       velocity <- predict_velocity_at_time(
         time = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction
+        MAC = MAC
       )
 
       abs((velocity / MSS) - percent) * x
@@ -179,18 +171,16 @@ find_velocity_critical_time <- function(MSS, TAU, time_correction = 0, percent =
 #' @description \code{find_acceleration_critical_distance} finds critical distance at which \code{percent}
 #'     of \code{MAC} is reached
 #' @export
-find_acceleration_critical_distance <- function(MSS, TAU, time_correction = 0, distance_correction = 0, percent = 0.9) {
+find_acceleration_critical_distance <- function(MSS, MAC, percent = 0.9) {
   critical_distance <- stats::optimize(
     function(x) {
       acceleration <- predict_acceleration_at_distance(
         distance = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
-        distance_correction = distance_correction
+        MAC = MAC
       )
 
-      abs((acceleration / (MSS / TAU)) - percent) * x
+      abs((acceleration / MAC) - percent) * x
     },
     interval = c(0, 100)
   )
@@ -202,17 +192,16 @@ find_acceleration_critical_distance <- function(MSS, TAU, time_correction = 0, d
 #' @description \code{find_acceleration_critical_time} finds critical time at which \code{percent} of
 #'     \code{MAC} is reached
 #' @export
-find_acceleration_critical_time <- function(MSS, TAU, time_correction = 0, percent = 0.9) {
+find_acceleration_critical_time <- function(MSS, MAC, percent = 0.9) {
   critical_distance <- stats::optimize(
     function(x) {
       acceleration <- predict_acceleration_at_time(
         time = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction
+        MAC = MAC
       )
 
-      abs((acceleration / (MSS / TAU)) - percent) * x
+      abs((acceleration / MAC) - percent) * x
     },
     interval = c(0, 10)
   )
@@ -225,17 +214,15 @@ find_acceleration_critical_time <- function(MSS, TAU, time_correction = 0, perce
 #' @description \code{find_power_critical_distance} finds critical distances at which maximal power over
 #'     \code{percent} is achieved
 #' @export
-find_power_critical_distance <- function(MSS, TAU, time_correction = 0, distance_correction = 0, percent = 0.9, ...) {
-  max_power <- find_max_power_distance(MSS, TAU, time_correction, distance_correction, ...)
+find_power_critical_distance <- function(MSS, MAC, percent = 0.9, ...) {
+  max_power <- find_max_power_distance(MSS, MAC, ...)
 
   critical_distance_lower <- stats::optimize(
     function(x) {
       pwr <- predict_power_at_distance(
         distance = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
-        distance_correction = distance_correction,
+        MAC = MAC,
         ...
       )
 
@@ -249,9 +236,7 @@ find_power_critical_distance <- function(MSS, TAU, time_correction = 0, distance
       pwr <- predict_power_at_distance(
         distance = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
-        distance_correction = distance_correction,
+        MAC = MAC,
         ...
       )
 
@@ -271,16 +256,15 @@ find_power_critical_distance <- function(MSS, TAU, time_correction = 0, distance
 #' @description \code{find_power_critical_time} finds critical times at which maximal power over
 #'     \code{percent} is achieved
 #' @export
-find_power_critical_time <- function(MSS, TAU, time_correction = 0, percent = 0.9, ...) {
-  max_power <- find_max_power_time(MSS, TAU, time_correction, ...)
+find_power_critical_time <- function(MSS, MAC, percent = 0.9, ...) {
+  max_power <- find_max_power_time(MSS, MAC, ...)
 
   critical_time_lower <- stats::optimize(
     function(x) {
       pwr <- predict_power_at_time(
         time = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
+        MAC = MAC,
         ...
       )
 
@@ -294,8 +278,7 @@ find_power_critical_time <- function(MSS, TAU, time_correction = 0, percent = 0.
       pwr <- predict_power_at_time(
         time = x,
         MSS = MSS,
-        TAU = TAU,
-        time_correction = time_correction,
+        MAC = MAC,
         ...
       )
 

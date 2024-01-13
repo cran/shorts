@@ -4,15 +4,11 @@ bibentry(
      author = c(
        person(given = "Mladen",
            family = "Jovanović",
-           role = c("aut", "cre"),
-           email = "coach.mladen.jovanovic@gmail.com"),
-      person(given = c("Jason", "D."),
-           family = "Vescovi",
-           role = c("dtc"),
-           email = "vescovij@gmail.com")
+           role = c("aut", "cre", "cph"),
+           email = "coach.mladen.jovanovic@gmail.com")
      ),
-     year = "2023",
-     note = "R package version 2.5.0",
+     year = "2024",
+     note = "R package version 3.0.0",
      url = "https://CRAN.R-project.org/package=shorts",
      key = "shorts-package"
    )

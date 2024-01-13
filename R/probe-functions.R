@@ -12,13 +12,13 @@
 #' @param resistance External horizontal resistance in Newtons (for example tether device or a sled friction resistance)
 #' @param distance Numeric vector
 #' @param perc Numeric vector. Probing percentage. Default is 2.5 percent
-#' @param ... Forwarded to \code{\link{predict_power_at_distance}} for the purpose of calculation of air resistance
+#' @inheritDotParams get_air_resistance
 #' @examples
 #' MSS <- 10
 #' MAC <- 8
 #' bodymass <- 75
 #'
-#' fv <- make_FV_profile(MSS, MAC, bodymass)
+#' fv <- create_FVP(MSS, MAC, bodymass)
 #'
 #' dist <- seq(5, 40, by = 5)
 #'

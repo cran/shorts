@@ -10,7 +10,7 @@
 #' @param inertia External inertia in kg (for example a weight vest, or a sled).
 #'         Not included in the air resistance calculation
 #' @param resistance External horizontal resistance in Newtons (for example tether device or a sled friction resistance)
-#' @param ... Forwarded to \code{\link{get_air_resistance}} for the purpose of calculation of air resistance and power
+#' @inheritDotParams get_air_resistance
 #' @return Numeric vector
 #' @references
 #' Haugen TA, Tønnessen E, Seiler SK. 2012. The Difference Is in the Start: Impact of Timing and Start
@@ -92,7 +92,7 @@ predict_time_at_distance_FV <- function(distance,
                                         resistance = 0,
                                         ...) {
   # Convert FVP back to AVP
-  AVP <- convert_FV(
+  AVP <- convert_FVP(
     F0 = F0,
     V0 = V0,
     bodymass = bodymass,
@@ -234,6 +234,51 @@ predict_relative_power_at_time <- function(time, MSS, MAC, bodymass = 75, inerti
   ) / bodymass
 }
 
+#' @rdname predict_kinematics
+#' @param ... Forwarded to \code{\link{predict_power_at_time}}
+#' @export
+predict_work_till_time <- function(time, ...) {
+  df <- data.frame(
+    time = time,
+    ...
+  )
+
+  df_list <- split(df, seq(1, nrow(df)))
+
+  res <- purrr::map_dbl(df_list, function(.x) {
+    integrand <- function(x) {
+      do.call(predict_power_at_time, as.list(tidyr::tibble(time = x, .x[-1])))
+    }
+
+    stats::integrate(integrand, lower = 0, upper = .x$time)$value
+  })
+
+  unname(res)
+}
+
+#' @rdname predict_kinematics
+#' @param ... Forwarded to \code{\link{predict_power_at_distance}}
+#' @export
+predict_work_till_distance <- function(distance, ...) {
+  df <- data.frame(
+    distance = distance,
+    ...
+  )
+
+  df_list <- split(df, seq(1, nrow(df)))
+
+  res <- purrr::map_dbl(df_list, function(.x) {
+    integrand <- function(x) {
+      do.call(predict_power_at_distance, as.list(tidyr::tibble(distance = x, .x[-1])))
+    }
+
+    stats::integrate(integrand, lower = 0, upper = .x$time)$value
+  })
+
+  unname(res)
+}
+
+
 #' Predicts sprint kinematics for 0-6sec (100hz) which include distance,
 #'     velocity, acceleration, and relative power.
 #'
@@ -262,6 +307,7 @@ predict_relative_power_at_time <- function(time, MSS, MAC, bodymass = 75, inerti
 #' )
 #'
 #' predict_kinematics(simple_model)
+#'
 predict_kinematics <- function(object = NULL,
                                MSS,
                                MAC,
@@ -307,8 +353,6 @@ predict_kinematics <- function(object = NULL,
   df$inertia <- inertia
   df$resistance <- resistance
 
-  df$net_horizontal_force <- df$bodymass * df$acceleration
-
   df$air_resistance <- predict_air_resistance_at_time(
     time = df$time,
     MSS = MSS,
@@ -337,8 +381,20 @@ predict_kinematics <- function(object = NULL,
 
   df$resultant_force <- sqrt(df$horizontal_force^2 + df$vertical_force^2)
   df$resultant_force_relative <- df$resultant_force / bodymass
+
   df$power <- df$horizontal_force * df$velocity
-  df$relative_power <- df$horizontal_force_relative * df$velocity
+  df$power_relative <- df$horizontal_force_relative * df$velocity
+  df$work <- predict_work_till_time(
+    time = df$time,
+    MSS = MSS,
+    MAC = MAC,
+    bodymass = bodymass,
+    inertia = inertia,
+    resistance = resistance,
+    ...
+  )
+  df$average_power <- df$work / df$time
+  df$average_power_relative <- df$average_power / bodymass
   df$RF <- df$horizontal_force / df$resultant_force
   df$force_angle <- atan(df$vertical_force / df$horizontal_force) * 180 / pi
 

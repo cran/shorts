@@ -5,16 +5,19 @@
 
 <!-- badges: start -->
 
-[![CRAN
-status](https://www.r-pkg.org/badges/version/shorts)](https://cran.r-project.org/package=shorts)
 [![DOI](https://zenodo.org/badge/254907272.svg)](https://zenodo.org/badge/latestdoi/254907272)
+[![R-CMD-check](https://github.com/mladenjovanovic/shorts/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mladenjovanovic/shorts/actions/workflows/R-CMD-check.yaml)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/shorts)](https://CRAN.R-project.org/package=shorts)
 <!-- badges: end -->
 
-This package creates short sprint (\<6sec) profiles using the split
-times, or the radar gun data. Mono-exponential equation is used to
-estimate maximal sprinting speed (MSS), relative acceleration (TAU), and
-other parameters. These parameters can be used to predict kinematic and
-kinetics variables and to compare individuals.
+**{shorts}** is an R package aimed for the analysis of the un-resisted
+and resisted short sprints (\<6sec; without deceleration), creation of
+*acceleration-velocity profiles* (AVP), *force-velocity profiles* (FVP),
+and *optimization profiles* using variety of sprint traces (e.g.,
+time-velocity from laser/radar gun, distance-time from timing
+gates/photocells). It represents a simple to use tool for researcher and
+practitioners interested in modeling short sprints performance.
 
 ## Installation
 
@@ -23,29 +26,31 @@ kinetics variables and to compare individuals.
 install.packages("shorts")
 
 # Or the development version from GitHub
-# install.packages("devtools")
-devtools::install_github("mladenjovanovic/shorts")
+# install.packages("remotes")
+remotes::install_github("mladenjovanovic/shorts")
 ```
 
 ## Examples
 
-**{shorts}** comes with two sample data sets: `split_times` and
-`radar_gun_data` with N=5 athletes. Let’s load them both:
+**{shorts}** comes with multiple sample data sets. Let’s load
+`split_times` and `radar_gun_data` with N=5 athletes:
 
 ``` r
-require(shorts)
-require(tidyverse)
-require(knitr)
+library(shorts)
+library(tidyverse)
+library(knitr)
 
 data("split_times", "radar_gun_data")
 ```
 
 ### Profiling using split times
 
-To model sprint performance using split times, distance will be used as
-predictor and time as target. Since `split_times` contains data for
-multiple athletes, let’s extract only one athlete and model it using
-`shorts::model_timing_gates()` function.
+**{shorts}** package utilizes modified *mono-exponential functions* to
+model short sprint performance. To model sprint performance using split
+times, distance will be used as predictor and time as target. Since
+`split_times` dataset contains data for multiple athletes, let’s extract
+only one athlete and model it using `shorts::model_timing_gates()`
+function.
 
 ``` r
 kimberley_data <- filter(split_times, athlete == "Kimberley")
@@ -62,13 +67,11 @@ kable(kimberley_data)
 | Kimberley |         55 |       30 | 4.313 |
 | Kimberley |         55 |       40 | 5.444 |
 
-`shorts::model_timing_gates()` returns an object with `parameters`,
-`model_fit`, `model` returned from `minpack.lm::nlsLM()` function and
-`data` used to estimate parameters. Parameters estimated using
-mono-exponential equation are *maximal sprinting speed* (MSS), and
-*relative acceleration* (TAU). Additional parameters computed from MSS
-and TAU are *maximal acceleration* (MAC) and *maximal relative power*
-(PMAX) (which is calculated as MAC\*MSS/4).
+Parameters estimated using mono-exponential equation are *maximal
+sprinting speed* ($MSS$), and *maximal acceleration* (MAC). Additional
+parameters computed from $MSS$ and $MAC$ are *relative acceleration*
+($TAU$) and *maximal relative power* ($PMAX$) (which is calculated as
+$MAC \cdot MSS\div4$).
 
 ``` r
 kimberley_profile <- shorts::model_timing_gates(
@@ -79,25 +82,26 @@ kimberley_profile <- shorts::model_timing_gates(
 kimberley_profile
 #> Estimated model parameters
 #> --------------------------
-#>        MSS        TAU        MAC       PMAX 
-#>  8.5911430  0.8113285 10.5889820 22.7428645 
+#>        MSS        MAC        TAU       PMAX 
+#>  8.5911431 10.5889817  0.8113285 22.7428642 
 #> 
 #> Model fit estimators
 #> --------------------
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>  0.03403413  0.99965531 -0.05293456  0.02699162  0.05293456  0.02778875 
-#>         MAE        MAPE 
-#>  0.02333341  1.19263265
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>    0.999655312   -0.003093343   -0.538602775   -0.052934568   -4.571206233 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>    0.026991611    0.857148665    0.052934568    4.571206233    0.027788752 
+#>      RMSE_perc            MAE       MAE_perc 
+#>    1.939218713    0.023333409    1.192632747
 
 summary(kimberley_profile)
 #> 
-#> Formula: time ~ TAU * I(LambertW::W(-exp(1)^(-distance/(MSS * TAU) - 1))) + 
-#>     distance/MSS + TAU
+#> Formula: time ~ predict_time_at_distance(distance, MSS, MAC)
 #> 
 #> Parameters:
 #>     Estimate Std. Error t value Pr(>|t|)    
-#> MSS  8.59114    0.12251   70.13 2.48e-07 ***
-#> TAU  0.81133    0.04581   17.71 5.97e-05 ***
+#> MSS   8.5911     0.1225   70.13 2.48e-07 ***
+#> MAC  10.5890     0.4599   23.03 2.11e-05 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -107,11 +111,16 @@ summary(kimberley_profile)
 #> Achieved convergence tolerance: 1.49e-08
 
 coef(kimberley_profile)
-#>        MSS        TAU        MAC       PMAX 
-#>  8.5911430  0.8113285 10.5889820 22.7428645
+#>       MSS       MAC 
+#>  8.591143 10.588982
+
+confint(kimberley_profile, level = 0.95)
+#>         2.5%     97.5%
+#> MSS 8.273337  8.963098
+#> MAC 9.421593 12.022126
 ```
 
-To return the predicted outcome (in this case time variable), use
+To return the predicted/fitted values (in this case time variable), use
 `predict()` function:
 
 ``` r
@@ -119,7 +128,9 @@ predict(kimberley_profile)
 #> [1] 1.210935 1.897021 2.521028 3.122008 4.299243 5.466324
 ```
 
-To create a simple plot, use S3 `plot()` method:
+To create a simple plot use S3 `plot()` method. There are four type
+options: `"model"` (default), `"kinematics-time"`,
+`"kinematics-distance"`, or `"residuals"`:
 
 ``` r
 plot(kimberley_profile) +
@@ -127,6 +138,27 @@ plot(kimberley_profile) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="90%" style="display: block; margin: auto;" />
+
+``` r
+plot(kimberley_profile, "kinematics-time") +
+  theme_bw()
+```
+
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="90%" style="display: block; margin: auto;" />
+
+``` r
+plot(kimberley_profile, "kinematics-distance") +
+  theme_bw()
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" />
+
+``` r
+plot(kimberley_profile, "residuals") +
+  theme_bw()
+```
+
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="90%" style="display: block; margin: auto;" />
 
 If you are interested in calculating average split velocity, use
 `shorts::format_splits()`
@@ -146,21 +178,6 @@ kable(shorts::format_splits(
 |     4 |                   15 |                  20 |              5 |            2.541 |           3.149 |      0.608 |          8.223684…. |              0.834925…. |
 |     5 |                   20 |                  30 |             10 |            3.149 |           4.313 |      1.164 |          8.591065…. |              0.315619…. |
 |     6 |                   30 |                  40 |             10 |            4.313 |           5.444 |      1.131 |          8.841732…. |              0.221633…. |
-
-Let’s plot observed vs fitted split times. For this we can use `data`
-returned from `shorts::model_timing_gates()` since it contains
-`pred_time` column.
-
-``` r
-ggplot(kimberley_profile$data, aes(x = distance)) +
-  theme_bw() +
-  geom_point(aes(y = time)) +
-  geom_line(aes(y = pred_time)) +
-  xlab("Distance (m)") +
-  ylab("Time (s)")
-```
-
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" />
 
 To plot predicted velocity, acceleration, air resistance, force, and
 power over distance, use `shorts:predict_XXX()`. Please note that to
@@ -228,10 +245,11 @@ ggplot(kimberley_pred, aes(x = distance, y = value)) +
   ylab(NULL)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="90%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="90%" style="display: block; margin: auto;" />
 
 To do prediction simpler, use `shorts::predict_kinematics()` function.
-This will provide kinetics and kinematics for 0-6s sprint using 100Hz.
+This will provide kinetics and kinematics for 0-6 $s$ sprint using 100
+$Hz$.
 
 ``` r
 predicted_kinematics <- predict_kinematics(
@@ -243,21 +261,21 @@ predicted_kinematics <- predict_kinematics(
 kable(head(predicted_kinematics))
 ```
 
-| time |  distance |  velocity | acceleration | bodymass | inertia | resistance | net_horizontal_force | air_resistance | horizontal_force | horizontal_force_relative | vertical_force | resultant_force | resultant_force_relative |     power | relative_power |        RF | force_angle |
-|-----:|----------:|----------:|-------------:|---------:|--------:|-----------:|---------------------:|---------------:|-----------------:|--------------------------:|---------------:|----------------:|-------------------------:|----------:|---------------:|----------:|------------:|
-| 0.00 | 0.0000000 | 0.0000000 |    10.588982 |       60 |       0 |          0 |             635.3389 |      0.0000000 |         635.3389 |                 10.588982 |          588.6 |        866.0863 |                 14.43477 |   0.00000 |       0.000000 | 0.7335746 |    42.81309 |
-| 0.01 | 0.0005273 | 0.1052399 |    10.459269 |       60 |       0 |          0 |             627.5561 |      0.0026620 |         627.5588 |                 10.459313 |          588.6 |        860.3953 |                 14.33992 |  66.04424 |       1.100737 | 0.7293843 |    43.16520 |
-| 0.02 | 0.0021005 | 0.2091907 |    10.331145 |       60 |       0 |          0 |             619.8687 |      0.0105181 |         619.8792 |                 10.331320 |          588.6 |        854.8100 |                 14.24683 | 129.67295 |       2.161216 | 0.7251660 |    43.51734 |
-| 0.03 | 0.0047068 | 0.3118680 |    10.204590 |       60 |       0 |          0 |             612.2754 |      0.0233774 |         612.2988 |                 10.204980 |          588.6 |        849.3290 |                 14.15548 | 190.95643 |       3.182607 | 0.7209206 |    43.86946 |
-| 0.04 | 0.0083337 | 0.4132876 |    10.079586 |       60 |       0 |          0 |             604.7751 |      0.0410543 |         604.8162 |                 10.080270 |          588.6 |        843.9506 |                 14.06584 | 249.96306 |       4.166051 | 0.7166488 |    44.22151 |
-| 0.05 | 0.0129685 | 0.5134649 |     9.956113 |       60 |       0 |          0 |             597.3668 |      0.0633688 |         597.4301 |                  9.957169 |          588.6 |        838.6732 |                 13.97789 | 306.75938 |       5.112656 | 0.7123515 |    44.57343 |
+| time |  distance |  velocity | acceleration | bodymass | inertia | resistance | air_resistance | horizontal_force | horizontal_force_relative | vertical_force | resultant_force | resultant_force_relative |     power | power_relative |      work | average_power | average_power_relative |        RF | force_angle |
+|-----:|----------:|----------:|-------------:|---------:|--------:|-----------:|---------------:|-----------------:|--------------------------:|---------------:|----------------:|-------------------------:|----------:|---------------:|----------:|--------------:|-----------------------:|----------:|------------:|
+| 0.00 | 0.0000000 | 0.0000000 |    10.588982 |       60 |       0 |          0 |      0.0000000 |         635.3389 |                 10.588982 |          588.6 |        866.0863 |                 14.43477 |   0.00000 |       0.000000 | 0.0000000 |           NaN |                    NaN | 0.7335746 |    42.81309 |
+| 0.01 | 0.0005273 | 0.1052399 |    10.459269 |       60 |       0 |          0 |      0.0026620 |         627.5588 |                 10.459313 |          588.6 |        860.3952 |                 14.33992 |  66.04424 |       1.100737 | 0.3322639 |      33.22639 |              0.5537732 | 0.7293843 |    43.16520 |
+| 0.02 | 0.0021005 | 0.2091907 |    10.331145 |       60 |       0 |          0 |      0.0105181 |         619.8792 |                 10.331320 |          588.6 |        854.8100 |                 14.24683 | 129.67294 |       2.161216 | 1.3128332 |      65.64166 |              1.0940276 | 0.7251660 |    43.51734 |
+| 0.03 | 0.0047068 | 0.3118680 |    10.204590 |       60 |       0 |          0 |      0.0233774 |         612.2988 |                 10.204980 |          588.6 |        849.3290 |                 14.15548 | 190.95642 |       3.182607 | 2.9179055 |      97.26352 |              1.6210586 | 0.7209206 |    43.86946 |
+| 0.04 | 0.0083337 | 0.4132876 |    10.079586 |       60 |       0 |          0 |      0.0410543 |         604.8162 |                 10.080270 |          588.6 |        843.9506 |                 14.06584 | 249.96305 |       4.166051 | 5.1243723 |     128.10931 |              2.1351551 | 0.7166488 |    44.22151 |
+| 0.05 | 0.0129685 | 0.5134649 |     9.956112 |       60 |       0 |          0 |      0.0633688 |         597.4301 |                  9.957169 |          588.6 |        838.6732 |                 13.97789 | 306.75937 |       5.112656 | 7.9097991 |     158.19598 |              2.6365997 | 0.7123515 |    44.57343 |
 
 To get model residuals, use `residuals()` function:
 
 ``` r
 residuals(kimberley_profile)
-#> [1] -0.052934560 -0.004021206  0.019971712  0.026991617  0.013756878
-#> [6] -0.022324483
+#> [1] -0.052934568 -0.004021215  0.019971704  0.026991611  0.013756880
+#> [6] -0.022324473
 ```
 
 Package **{shorts}** comes with `find_XXX()` family of functions that
@@ -314,7 +332,8 @@ shorts::find_velocity_critical_distance(
 
 The radar gun data is modeled using measured velocity as target variable
 and time as predictor. Individual analysis is performed using
-`shorts::model_radar_gun()` function. Let’s do analysis for Jim:
+`shorts::model_radar_gun()` function or `shorts::model_laser_gun()`
+(they are aliases). Let’s do analysis for Jim:
 
 ``` r
 jim_data <- filter(radar_gun_data, athlete == "Jim")
@@ -327,57 +346,58 @@ jim_profile <- shorts::model_radar_gun(
 jim_profile
 #> Estimated model parameters
 #> --------------------------
-#>          MSS          TAU          MAC         PMAX           TC 
-#> 7.998011e+00 8.887955e-01 8.998708e+00 1.799294e+01 1.103989e-04 
+#>        MSS        MAC        TAU       PMAX 
+#>  7.9980115  8.9987070  0.8887956 17.9929403 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#>            TC 
+#> -0.0001104572 
 #> 
 #> Model fit estimators
 #> --------------------
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>  0.05062927  0.99924409 -0.16404520  0.15112314  0.16404520  0.05050254 
-#>         MAE        MAPE 
-#>  0.03927236         Inf
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   9.992441e-01  -2.481182e-08           -Inf  -1.640451e-01           -Inf 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   1.511234e-01   2.332511e+00   1.640451e-01            Inf   5.050254e-02 
+#>      RMSE_perc            MAE       MAE_perc 
+#>            Inf   3.927236e-02            Inf
 
 summary(jim_profile)
 #> 
-#> Formula: velocity ~ MSS * (1 - exp(1)^(-(time + TC)/TAU))
+#> Formula: velocity ~ predict_velocity_at_time(time - TC, MSS, MAC)
 #> 
 #> Parameters:
-#>      Estimate Std. Error t value Pr(>|t|)    
-#> MSS 7.9980114  0.0031934 2504.54   <2e-16 ***
-#> TAU 0.8887955  0.0021794  407.81   <2e-16 ***
-#> TC  0.0001104  0.0012283    0.09    0.928    
+#>       Estimate Std. Error t value Pr(>|t|)    
+#> MSS  7.9980115  0.0031934 2504.55   <2e-16 ***
+#> MAC  8.9987070  0.0199701  450.61   <2e-16 ***
+#> TC  -0.0001105  0.0012283   -0.09    0.928    
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> Residual standard error: 0.05063 on 597 degrees of freedom
 #> 
-#> Number of iterations to convergence: 6 
+#> Number of iterations to convergence: 4 
 #> Achieved convergence tolerance: 1.49e-08
+
+confint(jim_profile)
+#>             2.5%       97.5%
+#> MSS  7.991747860 8.004286924
+#> MAC  8.959592160 9.037967809
+#> TC  -0.002530815 0.002291737
 
 plot(jim_profile) +
   theme_bw()
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="90%" style="display: block; margin: auto;" />
 
-The object returned from `shorts::model_radar_gun()` is same as object
-returned from `shorts::model_timing_gates()`. Let’s plot Jim’s measured
-velocity and predicted velocity:
+In addition to $MSS$ and $MAC$ parameters, `shorts::model_radar_gun()`
+function also estimated *time-correction* ($TC$) parameter.
 
-``` r
-ggplot(jim_profile$data, aes(x = time)) +
-  theme_bw() +
-  geom_line(aes(y = velocity), alpha = 0.5) +
-  geom_line(aes(y = pred_velocity), color = "red", alpha = 0.5) +
-  xlab("Time (s)") +
-  ylab("Velocity (m/s)")
-```
-
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="90%" style="display: block; margin: auto;" />
-
-Rather than estimating MSS, `shorts::model_radar_gun()` function allows
-you to utilize peak velocity observed in the data as MSS. This is done
-by setting the `use_observed_MSS` parameter to `TRUE`:
+Rather than estimating $MSS$, `shorts::model_radar_gun()` function
+allows you to utilize peak velocity observed in the data as $MSS$. This
+is done by setting the `use_observed_MSS` parameter to `TRUE`:
 
 ``` r
 jim_profile <- shorts::model_radar_gun(
@@ -389,25 +409,32 @@ jim_profile <- shorts::model_radar_gun(
 jim_profile
 #> Estimated model parameters
 #> --------------------------
-#>         MSS         TAU         MAC        PMAX          TC 
-#>  8.09500000  0.93279456  8.67822382 17.56255546  0.01117667 
+#>        MSS        MAC        TAU       PMAX 
+#>  8.0950000  8.6782211  0.9327949 17.5625500 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#>          TC 
+#> -0.01117683 
 #> 
 #> Model fit estimators
 #> --------------------
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>  0.08004636  0.99875693 -0.22869210  0.18253899  0.22869210  0.07984600 
-#>         MAE        MAPE 
-#>  0.06431869         Inf
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>     0.99875693    -0.03881082           -Inf    -0.22869200           -Inf 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>     0.18253953     2.81740287     0.22869200            Inf     0.07984600 
+#>      RMSE_perc            MAE       MAE_perc 
+#>            Inf     0.06431872            Inf
 
 summary(jim_profile)
 #> 
-#> Formula: velocity ~ MSS * (1 - exp(1)^(-(time + TC)/TAU))
+#> Formula: velocity ~ predict_velocity_at_time(time - TC, MSS, MAC)
 #> 
 #> Parameters:
-#>     Estimate Std. Error  t value Pr(>|t|)    
-#> MSS 8.095000   0.005209 1554.099  < 2e-16 ***
-#> TAU 0.932795   0.003605  258.739  < 2e-16 ***
-#> TC  0.011177   0.002025    5.519  5.1e-08 ***
+#>      Estimate Std. Error  t value Pr(>|t|)    
+#> MSS  8.095000   0.005209 1554.099  < 2e-16 ***
+#> MAC  8.678221   0.030174  287.601  < 2e-16 ***
+#> TC  -0.011177   0.002025   -5.519 5.09e-08 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -422,61 +449,159 @@ summary(jim_profile)
 Some tether devices provide data out in a velocity-at-distance format.
 In this case, velocity is the outcome variable and distance is the
 predictor. To estimate sprint profiles from *tether data*, use
-`shorts::model_tether()` function:
+`shorts::model_tether()` function.
 
 ``` r
-distance <- c(5, 10, 20, 30, 40)
+# This creates sprint trace
+tether_df <- shorts::create_sprint_trace(
+  MSS = 7, MAC = 6,
+  time = seq(0.01, 6, by = 0.01))
 
-velocity <- predict_velocity_at_distance(distance, MSS = 10, MAC = 8)
+m1 <- model_tether(
+  distance = tether_df$distance,
+  velocity = tether_df$velocity)
 
-m1 <- model_tether(distance = distance, velocity = velocity)
-
-df <- data.frame(
-  distance = distance,
-  obs_velocity = velocity
-)
-
-plot(m1) +
-  geom_point(data = df, aes(x = distance, y = obs_velocity))
-```
-
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="90%" style="display: block; margin: auto;" />
-
-Setting `use_observed_MSS` parameter to `TRUE` in the
-`shorts::model_tether()` function also allows you to use observed peak
-velocity as MSS.
-
-In the case when distance is not centered at zero, use
-`shorts::model_tether_DC()` which also estimated the *distance
-correction* (DC) parameter, serving as model intercept:
-
-``` r
-distance <- c(5, 10, 20, 30, 40)
-
-velocity <- predict_velocity_at_distance(distance - 0.5, MSS = 10, MAC = 8)
-
-m1 <- model_tether_DC(distance = distance, velocity = velocity)
 m1
 #> Estimated model parameters
 #> --------------------------
-#>   MSS   TAU   MAC  PMAX    DC 
-#> 10.00  1.25  8.00 20.00 -0.50 
+#>       MSS       MAC       TAU      PMAX 
+#>  7.000000  6.000000  1.166667 10.500000 
 #> 
 #> Model fit estimators
 #> --------------------
-#>          RSE    R_squared       minErr       maxErr    maxAbsErr         RMSE 
-#> 1.538370e-15 1.000000e+00 0.000000e+00 1.776357e-15 1.776357e-15 9.729507e-16 
-#>          MAE         MAPE 
-#> 7.105427e-16 8.773026e-15
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   1.000000e+00   4.638882e-16   8.491813e-13  -3.808065e-14  -3.200666e-11 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   2.984279e-13   4.995146e-10   2.984279e-13   4.995146e-10   1.259855e-14 
+#>      RMSE_perc            MAE       MAE_perc 
+#>   2.044889e-11   1.438294e-15   9.813336e-13
+
+plot(m1)
 ```
+
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="90%" style="display: block; margin: auto;" />
+
+Setting `use_observed_MSS` parameter to `TRUE` in the
+`shorts::model_tether()` function also allows you to use observed *peak
+velocity* as $MSS$.
+
+In the case when distance is not centered at zero, use
+`shorts::model_tether_DC()` which also estimated the *distance
+correction* ($DC$) parameter, serving as model intercept (for more info
+see [Using corrections](#using-corrections) section):
+
+``` r
+# This creates sprint trace
+tether_df <- shorts::create_sprint_trace(
+  MSS = 7, MAC = 6,
+  time = seq(0.001, 6, by = 0.01), 
+  # Add distance shift
+  DC = 5)
+
+m1 <- model_tether_DC(
+  distance = tether_df$distance,
+  velocity = tether_df$velocity)
+
+m1
+#> Estimated model parameters
+#> --------------------------
+#>       MSS       MAC       TAU      PMAX 
+#>  7.000000  6.000000  1.166667 10.500000 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#> DC 
+#>  5 
+#> 
+#> Model fit estimators
+#> --------------------
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   1.000000e+00   6.483757e-11   8.098034e-07  -1.517186e-11  -2.897114e-10 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   2.873803e-08   4.791725e-04   2.873803e-08   4.791725e-04   1.181241e-09 
+#>      RMSE_perc            MAE       MAE_perc 
+#>   1.956287e-05   7.412052e-11   8.099718e-07
+
+plot(m1)
+```
+
+<img src="man/figures/README-unnamed-chunk-17-1.png" width="90%" style="display: block; margin: auto;" />
+
+### Embedded (i.e., *in-situ*) Profiling
+
+With the modern technologies like GPS and LPS, session acceleration and
+velocity can be tracked continuously. This provides an opportunity to
+estimate short sprint profiles from *in-situ*, without the need for
+explicit testing (assuming the maximal effort was performed). The
+analysis is based on the theoretical model where acceleration and
+velocity have linear relationship (i.e., mono-exponential model applied
+thus far). The time frame of the analysis can vary from single drills
+(e.g., sprint drills), session, week, to multiple weeks.
+
+Here is an example of the data collected during one basketball session
+for a single person. Duration was approx. 90 min with 20 $Hz$ sampling
+rate. This is the positional data:
+
+``` r
+data("LPS_session")
+
+LPS_session %>%
+  ggplot(aes(x = x, y = y)) +
+  theme_bw() +
+  geom_point(alpha = 0.1)
+```
+
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="90%" style="display: block; margin: auto;" />
+
+The next figure plots instant acceleration and velocity:
+
+``` r
+LPS_session %>%
+  ggplot(aes(x = velocity, y = acceleration)) +
+  theme_bw() +
+  geom_point(alpha = 0.1)
+```
+
+<img src="man/figures/README-unnamed-chunk-19-1.png" width="90%" style="display: block; margin: auto;" />
+
+To estimate embedded short sprint profile, we need to filter out
+positive acceleration and velocities over 3 $ms{-1}$ (default), then
+filter few top acceleration observations per velocity bracket (for more
+information please see Clavel *et al.* (2023)). Here is the graphical
+representation:
+
+``` r
+embedded_model <- model_in_situ(
+  LPS_session$velocity,
+  LPS_session$acceleration,
+  velocity_threshold = 4)
+                                
+LPS_session %>%
+  filter(acceleration > 0) %>%
+  ggplot(aes(x = velocity, y = acceleration)) +
+  theme_bw() +
+  geom_point(alpha = 0.1) +
+  geom_point(
+    data = embedded_model$data, 
+    color = "red"
+  ) +
+  geom_abline(
+    intercept = coef(embedded_model$model)[[1]],
+    slope = coef(embedded_model$model)[[2]],
+    linetype = "dotted", color = "red") +
+  scale_x_continuous(expand = c(0, 0), limits = c(0,  embedded_model$parameters$MSS)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, embedded_model$parameters$MAC)) 
+```
+
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="90%" style="display: block; margin: auto;" />
 
 ### Force-Velocity Profiling
 
 To estimate *Force-Velocity Profile* (FVP) using approach by Samozino
-*et al.* (2016, 2022) use `shorts::make_FV_profile()`:
+*et al.* (2016, 2022) use `shorts::create_FVP()`:
 
 ``` r
-kimberley_fv <- shorts::make_FV_profile(
+kimberley_fv <- shorts::create_FVP(
   MSS = kimberley_profile$parameters$MSS,
   MAC = kimberley_profile$parameters$MAC,
   # These are needed to estimate air resistance
@@ -510,7 +635,7 @@ kimberley_fv
 To convert back to *Acceleration-Velocity Profile* (AVP), use:
 
 ``` r
-kimberley_avp <- shorts::convert_FV(
+kimberley_avp <- shorts::convert_FVP(
   F0 = kimberley_fv$F0,
   V0 = kimberley_fv$V0,
   bodymass = kimberley_bodymass,
@@ -525,7 +650,7 @@ kimberley_avp
 #> [1] 10.58898
 ```
 
-### Using external load
+#### Using external load
 
 **{shorts}** package also allows utilizing external load in estimating
 FVP, as well as using FVP parameters to predict kinematic and kinetic
@@ -533,12 +658,13 @@ variables. External load is represented either with additional
 **inertia** (i.e., weight vest), horizontal **resistance** (i.e., tether
 device that create additional resistance or help, or a hill sprinting),
 or both (i.e., a sled, which have both inertia and resistance due to
-friction forces).
+friction forces). One might also consider head and tail wind as a form
+of resistance (or assistance).
 
 Let’s see how theoretical model, assuming FVP is *determinant of
 performance* (which I do not agree with, BTW), predicts changes in
-sprint characteristics (i.e., MSS and MAC) under different external load
-conditions and magnitudes using Kimberley’s estimated FVP:
+sprint characteristics (i.e., $MSS$ and $MAC$) under different external
+load conditions and magnitudes using Kimberley’s estimated FVP:
 
 ``` r
 loads_df <- rbind(
@@ -547,7 +673,7 @@ loads_df <- rbind(
   tibble(type = "Sled", magnitude = seq(0, 40, length.out = 100), inertia = magnitude, resistance = magnitude * 9.81 * 0.4)
 ) %>%
   mutate(
-    data.frame(shorts::convert_FV(
+    data.frame(shorts::convert_FVP(
       F0 = kimberley_fv$F0,
       V0 = kimberley_fv$V0,
       bodymass = kimberley_bodymass,
@@ -567,7 +693,7 @@ loads_df %>%
   ylab(NULL)
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.png" width="90%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-23-1.png" width="90%" style="display: block; margin: auto;" />
 
 Following figure depicts the effect on split times under different load
 types and magnitudes, assuming FVP to be determinant of performance
@@ -593,7 +719,7 @@ dist_df %>%
   ylab("Time (s)")
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="90%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-24-1.png" width="90%" style="display: block; margin: auto;" />
 
 One can use external resistance when predicting force or power:
 
@@ -631,17 +757,17 @@ External resistances can also be utilized in the
 
 ### Using corrections
 
-You have probably noticed that estimated MSS and TAU were a bit too high
-for splits data. Biased estimates are due to differences in starting
-positions and *timing triggering methods* for certain measurement
-approaches (e.g. starting behind first timing gate, or allowing for body
-rocking).
+You have probably noticed that estimated $MSS$ and $TAU$ were a bit too
+high for splits data. Biased estimates are due to differences in
+starting positions and *timing triggering methods* for certain
+measurement approaches (e.g. starting behind first timing gate, or
+allowing for body rocking).
 
-Here I will provide quick summary. Often, this bias in estimates is
-dealt with by using heuristic rule of thumb of adding time correction
-(`time_correction`) to split times (e.g. from 0.3-0.5sec; see more in
-Haugen *et al.*, 2012). To do this, just add time correction to time
-split:
+Here I will provide quick summary (see more in Jovanović M., 2023).
+Often, this bias in estimates is dealt with by using heuristic rule of
+thumb of adding time correction (`time_correction`) to split times
+(e.g. from 0.3-0.5 $sec$; see more in Haugen *et al.*, 2012). To do
+this, just add time correction to time split:
 
 ``` r
 kimberley_profile_fixed_TC <- shorts::model_timing_gates(
@@ -652,25 +778,26 @@ kimberley_profile_fixed_TC <- shorts::model_timing_gates(
 kimberley_profile_fixed_TC
 #> Estimated model parameters
 #> --------------------------
-#>       MSS       TAU       MAC      PMAX 
-#>  9.127769  1.377624  6.625731 15.119536 
+#>       MSS       MAC       TAU      PMAX 
+#>  9.127769  6.625731  1.377624 15.119536 
 #> 
 #> Model fit estimators
 #> --------------------
-#>          RSE    R_squared       minErr       maxErr    maxAbsErr         RMSE 
-#>  0.009969260  0.999971375 -0.007689947  0.016398636  0.016398636  0.008139867 
-#>          MAE         MAPE 
-#>  0.006393853  0.285701748
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>    0.999971375    0.001009227    0.125589837   -0.007689947   -0.222961644 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>    0.016398637    1.124735020    0.016398637    1.124735020    0.008139867 
+#>      RMSE_perc            MAE       MAE_perc 
+#>    0.477039255    0.006393853    0.285701750
 
 summary(kimberley_profile_fixed_TC)
 #> 
-#> Formula: time ~ TAU * I(LambertW::W(-exp(1)^(-distance/(MSS * TAU) - 1))) + 
-#>     distance/MSS + TAU
+#> Formula: time ~ predict_time_at_distance(distance, MSS, MAC)
 #> 
 #> Parameters:
 #>     Estimate Std. Error t value Pr(>|t|)    
-#> MSS  9.12777    0.05355  170.44 7.11e-09 ***
-#> TAU  1.37762    0.02131   64.66 3.43e-07 ***
+#> MSS  9.12777    0.05355   170.4 7.11e-09 ***
+#> MAC  6.62573    0.06569   100.9 5.79e-08 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -680,8 +807,8 @@ summary(kimberley_profile_fixed_TC)
 #> Achieved convergence tolerance: 1.49e-08
 
 coef(kimberley_profile_fixed_TC)
-#>       MSS       TAU       MAC      PMAX 
-#>  9.127769  1.377624  6.625731 15.119536
+#>      MSS      MAC 
+#> 9.127769 6.625731
 ```
 
 Instead of providing for `TC`, this parameter can be estimated using
@@ -696,15 +823,22 @@ kimberley_profile_TC <- shorts::model_timing_gates_TC(
 kimberley_profile_TC
 #> Estimated model parameters
 #> --------------------------
-#>        MSS        TAU        MAC       PMAX         TC 
-#>  8.9748354  1.2348566  7.2679173 16.3070903  0.2346537 
+#>       MSS       MAC       TAU      PMAX 
+#>  8.974835  7.267917  1.234857 16.307090 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#>         TC 
+#> -0.2346537 
 #> 
 #> Model fit estimators
 #> --------------------
-#>           RSE     R_squared        minErr        maxErr     maxAbsErr 
-#>  0.0011290466  0.9999996942 -0.0011807345  0.0012094658  0.0012094658 
-#>          RMSE           MAE          MAPE 
-#>  0.0007983565  0.0006586034  0.0282353187
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   9.999997e-01   1.854313e-11   1.816275e-03  -1.180734e-03  -6.237372e-02 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   1.209466e-03   5.974772e-02   1.209466e-03   6.237372e-02   7.983565e-04 
+#>      RMSE_perc            MAE       MAE_perc 
+#>   3.748224e-02   6.586034e-04   2.823532e-02
 ```
 
 Instead of estimating `TC`, **{shorts}** package features a method of
@@ -719,15 +853,22 @@ kimberley_profile_FD <- shorts::model_timing_gates_FD(
 kimberley_profile_FD
 #> Estimated model parameters
 #> --------------------------
-#>        MSS        TAU        MAC       PMAX         FD 
-#>  9.0026808  1.2877008  6.9912831 15.7350726  0.3015635 
+#>       MSS       MAC       TAU      PMAX 
+#>  9.002681  6.991283  1.287701 15.735073 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#>        FD 
+#> 0.3015635 
 #> 
 #> Model fit estimators
 #> --------------------
-#>           RSE     R_squared        minErr        maxErr     maxAbsErr 
-#>  0.0003901336  0.9999999635 -0.0004036159  0.0004557031  0.0004557031 
-#>          RMSE           MAE          MAPE 
-#>  0.0002758661  0.0002367539  0.0078291094
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   1.000000e+00   6.446653e-07   3.182633e-04  -4.036158e-04  -1.281727e-02 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   4.557031e-04   1.056580e-02   4.557031e-04   1.281727e-02   2.758661e-04 
+#>      RMSE_perc            MAE       MAE_perc 
+#>   8.402638e-03   2.367538e-04   7.829105e-03
 ```
 
 If you want to use fixed `FD` parameter (e.g., when you know what is the
@@ -743,139 +884,86 @@ kimberley_profile_fixed_FD <- shorts::model_timing_gates_FD(
 kimberley_profile_fixed_FD
 #> Estimated model parameters
 #> --------------------------
-#>       MSS       TAU       MAC      PMAX        FD 
-#>  9.178464  1.472935  6.231413 14.298700  0.500000 
+#>       MSS       MAC       TAU      PMAX 
+#>  9.178464  6.231413  1.472935 14.298700 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#>  FD 
+#> 0.5 
 #> 
 #> Model fit estimators
 #> --------------------
-#>          RSE    R_squared       minErr       maxErr    maxAbsErr         RMSE 
-#>  0.011228028  0.999973897 -0.007903690  0.015461987  0.015461987  0.007939415 
-#>          MAE         MAPE 
-#>  0.006718969  0.349905006
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>    0.999973897    0.001247560    0.177401418   -0.007903690   -0.250990469 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>    0.015461986    1.335231979    0.015461986    1.335231979    0.007939415 
+#>      RMSE_perc            MAE       MAE_perc 
+#>    0.564926522    0.006718969    0.349905002
 ```
+
+There are other corrections involving time correction (`TC`), distance
+correction (`DC`), flying distance correction (`FD`), and time and
+distance corrections (`TC+DC`). They are implemented in the
+`model_timing_gates_` and `model_time_distance_` functions. The
+difference between the `model_timing_gates_` and `model_time_distance_`
+is in reversing predictor and outcome variables.
 
 ### Cross-Validation (CV)
 
-`model_timing_gates_()` family of functions come with LOOCV feature that
-is performed by setting the function parameter `LOOCV = TRUE`. This
+`model_` family of functions come with CV feature that is performed by
+setting the function parameter CV to desired number of folds. This
 feature is very useful for checking model parameters robustness and
-model predictions on unseen data. LOOCV involve iterative model building
-and testing by removing observation one by one and making predictions
-for them. Let’s use Kimberley again, but this time perform LOOCV:
+model predictions on unseen data. Let’s use Kimberley again, but this
+time perform special kind of CV, leave-one-out-cross-validation (LOOCV):
 
 ``` r
-kimberley_profile_LOOCV <- shorts::model_timing_gates(
+kimberley_profile_CV <- shorts::model_timing_gates(
   distance = kimberley_data$distance,
   time = kimberley_data$time,
-  LOOCV = TRUE
+  # To perform LOOCV number of folds is equal to 
+  # number of observations
+  CV = nrow(kimberley_data)
 )
 
-kimberley_profile_LOOCV
+kimberley_profile_CV
 #> Estimated model parameters
 #> --------------------------
-#>        MSS        TAU        MAC       PMAX 
-#>  8.5911430  0.8113285 10.5889820 22.7428645 
+#>        MSS        MAC        TAU       PMAX 
+#>  8.5911431 10.5889817  0.8113285 22.7428642 
 #> 
 #> Model fit estimators
 #> --------------------
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>  0.03403413  0.99965531 -0.05293456  0.02699162  0.05293456  0.02778875 
-#>         MAE        MAPE 
-#>  0.02333341  1.19263265 
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>    0.999655312   -0.003093343   -0.538602775   -0.052934568   -4.571206233 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>    0.026991611    0.857148665    0.052934568    4.571206233    0.027788752 
+#>      RMSE_perc            MAE       MAE_perc 
+#>    1.939218713    0.023333409    1.192632747 
 #> 
 #> 
 #> Cross-Validation
 #> ------------------------------
 #> Parameters:
-#> # A tibble: 6 × 4
-#>     MSS   TAU   MAC  PMAX
-#>   <dbl> <dbl> <dbl> <dbl>
-#> 1  8.69 0.856  10.2  22.1
-#> 2  8.60 0.815  10.5  22.7
-#> 3  8.56 0.795  10.8  23.0
-#> 4  8.57 0.797  10.8  23.0
-#> 5  8.61 0.813  10.6  22.8
-#> 6  8.39 0.760  11.1  23.2
+#>   .fold      MSS      MAC       TAU     PMAX
+#> 1     1 8.693800 10.15512 0.8561005 22.07163
+#> 2     2 8.560667 10.76319 0.7953649 23.03503
+#> 3     3 8.394674 11.05010 0.7596925 23.19049
+#> 4     4 8.571600 10.75079 0.7972998 23.03786
+#> 5     5 8.608052 10.58783 0.8130141 22.78514
+#> 6     6 8.599600 10.54821 0.8152661 22.67760
 #> 
-#> Testing model fit:
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>          NA  0.99901083 -0.08009035  0.03444978  0.08009035  0.04742764 
-#>         MAE        MAPE 
-#>  0.03923868  1.72270378
+#> Testing model fit estimators (overall):
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>     0.99901083    -0.01236576    -0.85484642    -0.08009034    -5.96012088 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>     0.03444978     1.09399112     0.08009034     5.96012088     0.04742764 
+#>      RMSE_perc            MAE       MAE_perc 
+#>     2.59202750     0.03923868     1.72270380
 ```
 
-Box-plot is suitable method for plotting estimated parameters:
-
-``` r
-LOOCV_parameters <- gather(kimberley_profile_LOOCV$CV$parameters)
-
-ggplot(LOOCV_parameters, aes(y = value)) +
-  theme_bw() +
-  geom_boxplot() +
-  facet_wrap(~key, scales = "free") +
-  ylab(NULL) +
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())
-```
-
-<img src="man/figures/README-unnamed-chunk-27-1.png" width="90%" style="display: block; margin: auto;" />
-
-Let’s plot model LOOCV predictions and training (when using all data
-set) predictions against observed performance:
-
-``` r
-kimberley_data <- kimberley_data %>%
-  mutate(
-    pred_time = predict(kimberley_profile_LOOCV),
-    LOOCV_time = kimberley_profile_LOOCV$CV$data$pred_time
-  )
-
-ggplot(kimberley_data, aes(x = distance)) +
-  theme_bw() +
-  geom_point(aes(y = time)) +
-  geom_line(aes(y = pred_time), color = "black") +
-  geom_line(aes(y = LOOCV_time), color = "red") +
-  xlab("Distance (m)") +
-  ylab("Time (s)")
-```
-
-<img src="man/figures/README-unnamed-chunk-28-1.png" width="90%" style="display: block; margin: auto;" />
-
-Let’s plot predicted velocity using LOOCV estimate parameters to check
-robustness of the model predictions:
-
-``` r
-plot_data <- kimberley_profile_LOOCV$CV$parameters %>%
-  mutate(LOOCV = row_number())
-
-plot_data <- expand_grid(
-  data.frame(time = seq(0, 6, length.out = 100)),
-  plot_data
-) %>%
-  mutate(
-    LOOCV_velocity = predict_velocity_at_time(
-      time = time,
-      MSS = MSS,
-      MAC = MAC
-    ),
-    velocity = predict_velocity_at_time(
-      time = time,
-      MSS = kimberley_profile_LOOCV$parameters$MSS,
-      MAC = kimberley_profile_LOOCV$parameters$MAC
-    )
-  )
-
-ggplot(plot_data, aes(x = time, y = LOOCV_velocity, group = LOOCV)) +
-  theme_bw() +
-  geom_line(alpha = 0.8) +
-  geom_line(aes(y = velocity), color = "red", size = 0.5) +
-  xlab("Time (sec)") +
-  ylab("Velocity (m/s)")
-```
-
-<img src="man/figures/README-unnamed-chunk-29-1.png" width="90%" style="display: block; margin: auto;" />
-
-Cross-validation implemented in `model_radar_gun()` function involves
-using n-folds, set by using `CV=` parameter:
+Radar gun data often comes with much more observations, thus we can set
+smaller CV parameter:
 
 ``` r
 jim_profile_CV <- shorts::model_radar_gun(
@@ -887,59 +975,66 @@ jim_profile_CV <- shorts::model_radar_gun(
 jim_profile_CV
 #> Estimated model parameters
 #> --------------------------
-#>          MSS          TAU          MAC         PMAX           TC 
-#> 7.998011e+00 8.887955e-01 8.998708e+00 1.799294e+01 1.103989e-04 
+#>        MSS        MAC        TAU       PMAX 
+#>  7.9980115  8.9987070  0.8887956 17.9929403 
+#> 
+#> Estimated model corrections
+#> --------------------------
+#>            TC 
+#> -0.0001104572 
 #> 
 #> Model fit estimators
 #> --------------------
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>  0.05062927  0.99924409 -0.16404520  0.15112314  0.16404520  0.05050254 
-#>         MAE        MAPE 
-#>  0.03927236         Inf 
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   9.992441e-01  -2.481182e-08           -Inf  -1.640451e-01           -Inf 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   1.511234e-01   2.332511e+00   1.640451e-01            Inf   5.050254e-02 
+#>      RMSE_perc            MAE       MAE_perc 
+#>            Inf   3.927236e-02            Inf 
 #> 
 #> 
 #> Cross-Validation
 #> ------------------------------
 #> Parameters:
-#> # A tibble: 10 × 5
-#>      MSS   TAU   MAC  PMAX         TC
-#>    <dbl> <dbl> <dbl> <dbl>      <dbl>
-#>  1  8.00 0.888  9.00  18.0  0.0000839
-#>  2  8.00 0.889  8.99  18.0  0.000457 
-#>  3  8.00 0.889  9.00  18.0 -0.000151 
-#>  4  8.00 0.889  9.00  18.0 -0.0000337
-#>  5  8.00 0.888  9.00  18.0  0.000124 
-#>  6  8.00 0.889  9.00  18.0  0.000107 
-#>  7  8.00 0.888  9.01  18.0 -0.0000673
-#>  8  8.00 0.889  9.00  18.0  0.0000695
-#>  9  8.00 0.889  8.99  18.0  0.000263 
-#> 10  8.00 0.889  9.00  18.0  0.000259 
+#>    .fold      MSS      MAC       TAU     PMAX
+#> 1      1 7.997012 8.994930 0.8890577 17.98314
+#> 2      2 7.997697 9.003190 0.8883182 18.00120
+#> 3      3 7.997266 8.997429 0.8888391 17.98871
+#> 4      4 7.998063 8.997914 0.8888796 17.99147
+#> 5      5 7.999258 8.998932 0.8889119 17.99619
+#> 6      6 7.998143 9.002309 0.8884545 18.00044
+#> 7      7 7.998979 8.995074 0.8892622 17.98785
+#> 8      8 7.998321 9.001374 0.8885668 17.99897
+#> 9      9 7.998101 9.006872 0.8879998 18.00947
+#> 10    10 7.997287 8.988672 0.8897072 17.97125
 #> 
-#> Testing model fit:
-#>         RSE   R_squared      minErr      maxErr   maxAbsErr        RMSE 
-#>          NA  0.99923997 -0.16426599  0.15245264  0.16426599  0.05063981 
-#>         MAE        MAPE 
-#>  0.03940131         Inf
+#> Testing model fit estimators (overall):
+#>             R2        meanErr   meanErr_perc         minErr    minErr_perc 
+#>   9.992387e-01  -1.379258e-05           -Inf  -1.616499e-01           -Inf 
+#>         maxErr    maxErr_perc      maxAbsErr maxAbsErr_perc           RMSE 
+#>   1.507892e-01   2.327353e+00   1.616499e-01            Inf   5.068118e-02 
+#>      RMSE_perc            MAE       MAE_perc 
+#>            Inf   3.944147e-02            Inf
 ```
 
 ### Optimization
 
 Using the method outlined in Samozino *et al* (2022), one can find the
 optimal profiles, as well as the profile imbalance (compared to the
-optimal), for both sprint profiles (i.e., MSS and MAC) and
+optimal), for both sprint profiles (i.e., $MSS$ and $MAC$) and
 Force-Velocity (FV). In addition to this, one can *probe* the profiles
-(i.e., increase V0/F0 or MSS/MAC for say 2.5% to check which improvement
-yield more improvement in sprint time). The following graph depicts
-estimate profile imbalances. Note that \>100% is velocity deficit (i.e.,
-increasing *velocity*; MSS or V0; will yield more improvement in sprint
-times), while \<100% is *force* deficit.
+(i.e., increase $V0$ / $F0$ or $MSS$ / $MAC$ for say 2.5% to check which
+improvement yield more improvement in sprint time). The following graph
+depicts estimate profile imbalances. Note that \>100% is velocity
+deficit (i.e., increasing *velocity*; $MSS$ or $V0$; will yield more
+improvement in sprint times), while \<100% is *force* deficit.
 
 ``` r
 MSS <- 10
 MAC <- 8
 bodymass <- 75
 
-fv <- make_FV_profile(MSS, MAC, bodymass)
+fv <- create_FVP(MSS, MAC, bodymass)
 
 opt_df <- tibble(
   dist = seq(5, 50, by = 5)
@@ -1019,7 +1114,36 @@ ggplot(opt_df, aes(x = dist, y = value, color = profile)) +
   ylab("Profile imbalance")
 ```
 
-<img src="man/figures/README-unnamed-chunk-31-1.png" width="90%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-32-1.png" width="90%" style="display: block; margin: auto;" />
+
+### Creating your own data
+
+One can use the **{shorts}}** package for simulating data by using two
+functions: `create_sprint_trace()` and `create_timing_gates_splits()`:
+
+``` r
+create_sprint_trace(
+  MSS = 7, MAC = 6,
+  distance = c(5, 10, 20, 30, 40),
+  # Add flying distance
+  FD = 0.5)
+#>       time distance velocity acceleration sprint_time sprint_distance
+#> 1 1.241196        5 5.333967   1.42802852    1.674709             5.5
+#> 2 2.100178       10 6.202142   0.68387846    2.533690            10.5
+#> 3 3.625761       20 6.784214   0.18495957    4.059274            20.5
+#> 4 5.079956       30 6.937957   0.05318010    5.513469            30.5
+#> 5 6.515848       40 6.981879   0.01553227    6.949361            40.5
+
+create_timing_gates_splits(
+  MSS = 7, MAC = 6,
+  gates = c(5, 10, 20, 30, 40),
+  # Add time-shift (i.e., rection time of 200ms)
+  TC = 0.2)
+#> [1] 1.779729 2.652703 4.185497 5.641381 7.077741
+```
+
+Using `predict_` family of functions, one can predict kinematics and
+kinetics using *known* $MSS$ and $MAC$ parameters.
 
 ## Publications
 
@@ -1059,6 +1183,11 @@ Exercise:326–333. DOI: 10.1097/00005768-200102000-00024.
 Clark KP, Rieger RH, Bruno RF, Stearne DJ. 2017. The NFL Combine 40-Yard
 Dash: How Important is Maximum Velocity? Journal of Strength and
 Conditioning Research:1. DOI: 10.1519/JSC.0000000000002081.
+
+Clavel, P., Leduc, C., Morin, J.-B., Buchheit, M., & Lacome, M. (2023).
+Reliability of individual acceleration-speed profile in-situ in elite
+youth soccer players. Journal of Biomechanics, 153, 111602.
+<https://doi.org/10.1016/j.jbiomech.2023.111602>
 
 Furusawa K, Hill AV, and Parkinson JL. The dynamics of” sprint” running.
 Proceedings of the Royal Society of London. Series B, Containing Papers

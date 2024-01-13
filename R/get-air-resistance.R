@@ -3,12 +3,12 @@
 #' \code{get_air_resistance} estimates air resistance in Newtons
 #'
 #' @param velocity Instantaneous running velocity in meters per second (m/s)
-#' @param bodymass In kilograms (kg)
-#' @param bodyheight In meters (m)
-#' @param barometric_pressure In Torrs
-#' @param air_temperature In Celzius (C)
+#' @param bodymass In kilograms (kg). Default is 75kg
+#' @param bodyheight In meters (m). Default is 1.75m
+#' @param barometric_pressure In Torrs. Default is 760Torrs
+#' @param air_temperature In Celzius (C). Default is 25C
 #' @param wind_velocity In meters per second (m/s). Use negative number as head
-#'     wind, and positive number as back wind
+#'     wind, and positive number as back wind. Default is 0m/s (no wind)
 #' @return Air resistance in Newtons (N)
 #' @export
 #' @examples
@@ -46,5 +46,5 @@ get_air_resistance <- function(velocity,
   k <- 0.5 * air_density * frontal_area * drag_coefficient
 
   # Return air resistance
-  k * (velocity - wind_velocity)^2
+  k * sign(velocity - wind_velocity) * (velocity - wind_velocity)^2
 }

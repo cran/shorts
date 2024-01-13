@@ -16,9 +16,34 @@
 #' coef(simple_model)
 #' @export
 coef.shorts_model <- function(object, ...) {
-  return(unlist(object$parameters))
+  # This return model parameters
+  stats::coef(object$model, ...)
+  # This only return sprint parameters
+  # return(unlist(object$parameters))
 }
 
+
+#' S3 method for returning residuals of \code{shorts_model}
+#'
+#' @param object \code{shorts_model} object
+#' @param ... Extra arguments. Not used
+#' @examples
+#' split_distances <- c(10, 20, 30, 40, 50)
+#' split_times <- create_timing_gates_splits(
+#'   gates = split_distances,
+#'   MSS = 10,
+#'   MAC = 9,
+#'   FD = 0.25,
+#'   TC = 0
+#' )
+#'
+#' # Simple model
+#' simple_model <- model_timing_gates(split_distances, split_times)
+#' residuals(simple_model)
+#' @export
+residuals.shorts_model <- function(object, ...) {
+  object$predictions$.residual
+}
 
 #' S3 method for returning predictions of \code{shorts_model}
 #'
@@ -39,7 +64,7 @@ coef.shorts_model <- function(object, ...) {
 #' fitted(simple_model)
 #' @export
 fitted.shorts_model <- function(object, ...) {
-  object$data[[4]]
+  object$predictions$.predicted
 }
 
 #' S3 method for making predictions using \code{shorts_model}
@@ -64,6 +89,31 @@ predict.shorts_model <- function(object, ...) {
   stats::predict(object$model, ...)
 }
 
+#' S3 method for providing confidence intervals for the \code{shorts_model}
+#'
+#' @param object \code{shorts_model} object
+#' @param ... Forwarded to generic \code{confint()} function
+#' @examples
+#' \dontrun{
+#' split_distances <- c(10, 20, 30, 40, 50)
+#' split_times <- create_timing_gates_splits(
+#'   gates = split_distances,
+#'   MSS = 10,
+#'   MAC = 9,
+#'   FD = 0,
+#'   TC = 0,
+#'   noise = 0.01
+#' )
+#'
+#' # Simple model
+#' simple_model <- model_timing_gates(split_distances, split_times)
+#' confint(simple_model)
+#' }
+#' @export
+confint.shorts_model <- function(object, ...) {
+  stats::confint(object$model, ...)
+}
+
 #' S3 method for printing \code{shorts_model} object
 #' @param x \code{shorts_model} object
 #' @param ... Not used
@@ -86,6 +136,12 @@ print.shorts_model <- function(x, ...) {
   cat("--------------------------\n")
   print(unlist(x$parameters))
 
+  if (!is.null(x$corrections)) {
+    cat("\nEstimated model corrections\n")
+    cat("--------------------------\n")
+    print(unlist(x$corrections))
+  }
+
   cat("\nModel fit estimators\n")
   cat("--------------------\n")
   print(unlist(x$model_fit))
@@ -96,8 +152,8 @@ print.shorts_model <- function(x, ...) {
 
     cat("Parameters:\n")
     print(x$CV$parameters)
-    cat("\nTesting model fit:\n")
-    print(unlist(x$CV$model_fit))
+    cat("\nTesting model fit estimators (overall):\n")
+    print(unlist(x$CV$model_fit_overall))
   }
 }
 
@@ -123,47 +179,13 @@ summary.shorts_model <- function(object, ...) {
   summary(object$model)
 }
 
-#' S3 method for providing residuals for the \code{shorts_model} object
-#' @param object \code{shorts_model} object
-#' @param ... Not used
-#' @examples
-#' split_distances <- c(10, 20, 30, 40, 50)
-#' split_times <- create_timing_gates_splits(
-#'   gates = split_distances,
-#'   MSS = 10,
-#'   MAC = 9,
-#'   FD = 0.25,
-#'   TC = 0
-#' )
-#'
-#' # Simple model
-#' simple_model <- model_timing_gates(split_distances, split_times)
-#' residuals(simple_model)
-#' @export
-residuals.shorts_model <- function(object, ...) {
-  object$data[[2]] - object$data[[4]]
-}
-
 #' S3 method for plotting \code{shorts_model} object
 #' @param x \code{shorts_model} object
-#' @param type Not used
+#' @param type Type of plot. Can be "model" (default), "kinematics-time",
+#'     "kinematics-distance", or "residuals"
 #' @param ... Not used
-#' @return \link[ggplot2]{ggplot} object
+#' @return \code{\link[ggplot2]{ggplot}} object
 #' @examples
-#' split_times <- data.frame(
-#'   distance = c(5, 10, 20, 30, 35),
-#'   time = c(1.20, 1.96, 3.36, 4.71, 5.35)
-#' )
-#'
-#' # Simple model with time splits
-#' simple_model <- with(
-#'   split_times,
-#'   model_timing_gates(distance, time)
-#' )
-#'
-#' coef(simple_model)
-#' plot(simple_model)
-#'
 #' # Simple model with radar gun data
 #' instant_velocity <- data.frame(
 #'   time = c(0, 1, 2, 3, 4, 5, 6),
@@ -175,71 +197,88 @@ residuals.shorts_model <- function(object, ...) {
 #'   model_radar_gun(time, velocity)
 #' )
 #'
-#' # sprint_model$parameters
-#' coef(radar_model)
 #' plot(radar_model)
+#' plot(radar_model, "kinematics-time")
+#' plot(radar_model, "kinematics-distance")
+#' plot(radar_model, "residuals")
 #' @export
-plot.shorts_model <- function(x, type = NULL, ...) {
+plot.shorts_model <- function(x, type = "model", ...) {
 
-  # +++++++++++++++++++++++++++++++++++++++++++
-  # Code chunk for dealing with R CMD check note
+  # ----------------
+  Fitted <- NULL
+  Residual <- NULL
+  .observed <- NULL
+  .predicted <- NULL
+  .predictor <- NULL
+  distance <- NULL
+  kinematic <- NULL
+  time <- NULL
   value <- NULL
-  variable <- NULL
-  # +++++++++++++++++++++++++++++++++++++++++++
+  # ----------------
 
-  # Check which models is done?
-  model_type <- names(x$data[1])
-
-  if (model_type == "distance") {
-    # This is time-split model
-    df <- data.frame(
-      distance = seq(0, max(x$data$distance), length.out = 1000)
-    )
-
-    df$velocity <- predict_velocity_at_distance(
-      distance = df$distance,
-      MSS = x$parameters$MSS,
-      MAC = x$parameters$MAC
-    )
-
-    df$acceleration <- predict_acceleration_at_distance(
-      distance = df$distance,
-      MSS = x$parameters$MSS,
-      MAC = x$parameters$MAC
-    )
-    df$power <- df$velocity * df$acceleration
-  } else {
-    # This is radar model
-    df <- data.frame(
-      time = seq(0, max(x$data$time), length.out = 1000)
-    )
-
-    df$velocity <- predict_velocity_at_time(
-      time = df$time,
-      MSS = x$parameters$MSS,
-      MAC = x$parameters$MAC
-    )
-
-    df$acceleration <- predict_acceleration_at_time(
-      time = df$time,
-      MSS = x$parameters$MSS,
-      MAC = x$parameters$MAC
-    )
-
-    df$power <- df$velocity * df$acceleration
+  if (!(type %in% c("model", "kinematics-time", "kinematics-distance", "residuals"))) {
+    stop("Wrong plot type. Please use either 'model', 'kinematics-time', 'kinematics-distance', or 'residuals'", call. = FALSE)
   }
 
-  colnames(df)[1] <- "x"
+  if (type == "model") {
+    df <- data.frame(x$predictions)
 
-  plot_data <- tidyr::pivot_longer(df, cols = -1, names_to = "variable", values_to = "value")
-  plot_data$variable <- factor(
-    plot_data$variable,
-    levels = c("acceleration", "velocity", "power")
-  )
+    ggplot2::ggplot(df, ggplot2::aes(x = .predictor)) +
+      ggplot2::geom_point(ggplot2::aes(y = .observed), alpha = 0.8, shape = 21) +
+      ggplot2::geom_line(ggplot2::aes(y = .predicted), alpha = 0.8) +
+      ggplot2::xlab(x$model_info$predictor) +
+      ggplot2::ylab(x$model_info$target)
+  } else if (type == "kinematics-time") {
+    MSS <- x$parameters$MSS
+    MAC <- x$parameters$MAC
 
-  gg <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x, y = value, color = variable)) +
-    ggplot2::geom_line(alpha = 0.8) +
-    ggplot2::xlab(model_type) +
-    ggplot2::ylab(NULL)
-  gg
+    df <- data.frame(time = seq(0, 6, length.out = 1000))
+
+    df$velocity <- predict_velocity_at_time(df$time, MSS, MAC)
+    df$acceleration <- predict_acceleration_at_time(df$time, MSS, MAC)
+    df$power <- df$velocity * df$acceleration
+
+    df <- tidyr::pivot_longer(
+      data = df,
+      cols = c("velocity", "acceleration", "power"),
+      names_to = "kinematic",
+      values_to = "value"
+    )
+
+    df$kinematic <- factor(df$kinematic, levels = c("velocity", "acceleration", "power"))
+
+    ggplot2::ggplot(df, ggplot2::aes(x = time)) +
+      ggplot2::geom_line(ggplot2::aes(y = value, color = kinematic), alpha = 0.8) +
+      ggplot2::ylab(NULL)
+  } else if (type == "kinematics-distance") {
+    MSS <- x$parameters$MSS
+    MAC <- x$parameters$MAC
+
+    df <- data.frame(distance = seq(0, 60, length.out = 1000))
+
+    df$velocity <- predict_velocity_at_distance(df$distance, MSS, MAC)
+    df$acceleration <- predict_acceleration_at_distance(df$distance, MSS, MAC)
+    df$power <- df$velocity * df$acceleration
+
+    df <- tidyr::pivot_longer(
+      data = df,
+      cols = c("velocity", "acceleration", "power"),
+      names_to = "kinematic",
+      values_to = "value"
+    )
+
+    df$kinematic <- factor(df$kinematic, levels = c("velocity", "acceleration", "power"))
+
+    ggplot2::ggplot(df, ggplot2::aes(x = distance)) +
+      ggplot2::geom_line(ggplot2::aes(y = value, color = kinematic), alpha = 0.8) +
+      ggplot2::ylab(NULL)
+  } else if (type == "residuals") {
+    df <- data.frame(
+      Fitted = x$predictions$.predicted,
+      Residual = x$predictions$.residual
+    )
+
+    ggplot2::ggplot(df, ggplot2::aes(x = Fitted, y = Residual)) +
+      ggplot2::geom_point(alpha = 0.7, shape = 21)
+  }
 }

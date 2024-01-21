@@ -1,7 +1,7 @@
-1f7062cbb1fec969119ae813dcd1bfcb *DESCRIPTION
+e46b9e9c4b19f7b8a0a35e3029ef1861 *DESCRIPTION
 269d93a5fd96ec5d2fbc7ced088f376e *LICENSE
 a0c0dcac880f21a48ca6e33239bf59b0 *NAMESPACE
-4bf5bc0cb4fdc921b310513bc1895127 *NEWS.md
+7300c51587743f168a0799b958249f66 *NEWS.md
 c4a817a721761ada3ff76a098ed61ad3 *R/convert-FVP.R
 4926d5ab59ff7d79369c100d1366fd24 *R/create-FVP.R
 884e653477201955b55f52176e3737e2 *R/create-sprint-trace.R
@@ -18,8 +18,8 @@ f43f8892882a814aa27d9b0478490d4a *R/find-optimal-distance.R
 8d5af6c5fd0134b2ff209734acb5e0c8 *R/format-splits.R
 7c4798ce38400f902f265da01292ca69 *R/get-air-resistance.R
 8a4ba5356c5ed29a22f7dca79f7d3539 *R/model-function.R
-b710fb83b8e5f35bf61d024dc4b3ff4b *R/model-in-situ.R
-9b37fb885e06bb82910b3a6ee1fbfab2 *R/model-radar-gun.R
+15b357d963d9281953020620c0a5b109 *R/model-in-situ.R
+e4cfc695563d1a337243b74a41464f21 *R/model-radar-gun.R
 850a7f3003e9bef7534f24dd1eed9c20 *R/model-tether.R
 1b5468250a16e5e8d8e72accf62f6ce9 *R/model-time-distance.R
 c67d4931e793847a3469de9a184dc3ad *R/model-timing-gates.R
@@ -37,7 +37,7 @@ f71512d67910fe93e678d211c104a708 *R/shorts-model-fit.R
 9ddd69ce00f0c2f6ba26cd2c5ca823c8 *data/radar_gun_data.rda
 c220a4f843d436e91e07f6449849c024 *data/split_times.rda
 e42dcc2801f24c1f5768d66f71bd0528 *data/vescovi.rda
-eb8fd3d0d344bc3385ed222341e9aec2 *inst/CITATION
+d1c0c02a0a331a92e146045fbe454ab3 *inst/CITATION
 d391c80503ff19388f887190236cb233 *man/LPS_session.Rd
 a5eff2c2e4a9de5d7e18d68e72cb937b *man/coef.shorts_model.Rd
 f511cb9bc6953f428dda55b0537797fc *man/confint.shorts_model.Rd
@@ -56,7 +56,7 @@ a10b857e5a6b6bb7ab6e67d3baed9c53 *man/figures/README-unnamed-chunk-16-1.png
 c128188d23e7bb95f30630a5119f12dc *man/figures/README-unnamed-chunk-17-1.png
 3e63296f1dec58ab4722016f860961c0 *man/figures/README-unnamed-chunk-18-1.png
 4276498697e0bd564c63c8d9ea86e2a9 *man/figures/README-unnamed-chunk-19-1.png
-cc0b7735861d97d6b99a03da891e398e *man/figures/README-unnamed-chunk-20-1.png
+cc4ce9aa40d9384d9a7eb575b4b103b5 *man/figures/README-unnamed-chunk-20-1.png
 cc0b7735861d97d6b99a03da891e398e *man/figures/README-unnamed-chunk-21-1.png
 d95c096e360a84c04ba21bbdb4449a3d *man/figures/README-unnamed-chunk-22-1.png
 3d38e46aca1ef301d7adef003251ca3c *man/figures/README-unnamed-chunk-23-1.png
@@ -82,7 +82,7 @@ e16d1524e47fe6f17f8dc692fbd5f695 *man/format_splits.Rd
 147ef09b075bc78424c67acdbb53d759 *man/get_air_resistance.Rd
 a0b649fdd2bd56dbda086639d8858160 *man/jb_morin.Rd
 aaf6e7f01ffc7f9f7c50485165e147ae *man/laser_gun_data.Rd
-6f0d926fea7ab18bedf62d51eb7cfdc0 *man/model_functions.Rd
+41899efa806818467a8170c26aa92b44 *man/model_functions.Rd
 ec67b8a08e6ccadcb0b63e901278b2bb *man/optimal_functions.Rd
 ef15801de77c8c3eda87ce2163db26b7 *man/plot.shorts_model.Rd
 45a65fb61707e9756aa0017c27d6fe7d *man/predict.shorts_model.Rd

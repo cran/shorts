@@ -1,3 +1,14 @@
+# shorts 3.1.1
+
+* For `model_in_situ()` function, the filtering parameters (`velocity_threshold`, `velocity_step`, and `n_observations`) are returned in the `corrections` element of the returned object. These are also returned in the `CV` element of the returned object for every cross-validation fold
+* `velocity_threshold` parameter in the `model_in_situ()` function is now by default `NULL`, in which case the velocity of the observation with the fastest acceleration is taken as the cutoff value
+* Updated the *in-situ* examples in the README file
+* Cleaned the `theme_bw()` from README and set default `ggplot` theme with `ggdist::ggdist()`
+* Fixed the error in README example for plotting the in-situ velocity-acceleration profile 
+* Fixed error in the `find_optimal_FV_scalar()` function and all upper-level calling functions which happens when `resistance` parameter is below zero
+* Added new publication in README and DESCRIPTION
+* Rebuilt `split_times` since it has `AsIs` object, causing issues with `ggplot2` plotting in the README file
+
 # shorts 3.1.0
 
 * Fixed the error in `model_radar_gun()` and `model_laser_gun()` examples that happened on `r-release-macos-arm64` and `r-oldrel-macos-arm64` due to the perfect model fit causing "singular gradient matrix at initial parameter estimates". This is sorted by adding simple noise to the simulated data

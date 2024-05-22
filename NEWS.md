@@ -1,3 +1,8 @@
+# shorts 3.2.0
+
+* Fixed error in `predict_work_till_distance()` function
+* Added `model_timing_gates_FD_fixed()` and `model_time_distance_FD_fixed()` which allow user to set the fixed `FD` parameter. This was before done using additional parameter in `model_timing_gates_FD()` and `model_time_distance_FD()` functions, but now these functions only provide estimated `FD`. This is done to allow confidence intervals estimation, which was impossible to do since fixed `FD` was also *estimated*, but it was constrained by the optimization function to user-provided value. 
+
 # shorts 3.1.1
 
 * For `model_in_situ()` function, the filtering parameters (`velocity_threshold`, `velocity_step`, and `n_observations`) are returned in the `corrections` element of the returned object. These are also returned in the `CV` element of the returned object for every cross-validation fold
